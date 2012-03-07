@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simple Text Generation Demo</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=us-ascii" />
+  <script type='text/javascript' src='../tabs/tabs.js'> </script>
+  <script type='text/javascript' src='../brijj/engine.js'> </script>
+  <script type='text/javascript' src='../brijj/interface/Demo.js'> </script>
+  <script type="text/javascript" src='text.js'> </script>
+  <link rel="stylesheet" type="text/css" href="../tabs/tabs.css" />
+  <link rel="stylesheet" type="text/css" href="../generic.css" />
+</head>
+
+<body onload="Tabs('tabList');">
+<div id="page-title">[
+  <a href="http://r0kit.net/brijj/">BriJJ Website</a> |
+  <a href="..">Web Application Index</a>
+]</div>
+
+<h1>Dynamically Updating Text</h1>
+
+<p>This is a simple demonstration of how to dynamically update a web-page with
+text fetched from a web server.</p>
+
+<ul id="tabList">
+  <li><a data-tab="demoDiv">Demo</a></li>
+  <li><a data-tab="explainDiv">How it works</a></li>
+</ul>
+
+<div id="demoDiv">
+  <p>
+      Name:
+      <input type="text" id="demoName" value="Joe"/>
+      <input type="button" id="demoSend" value="Send" onclick="update()"/>
+      <br/>
+      Reply: <span id="demoReply" style="background:#eeffdd; padding-left:4px; padding-right:4px;">&nbsp;</span>
+    </p>
+
+  </div>
+
+<div id="explainDiv">
+    <p>When you click on the "Send" button the browser calls the onclick event,
+    which calls the <code>update()</code> function:</p>
+    
+<pre>
+function update() {
+  var name = document.getElementById("demoName").value;
+  Demo.sayHello(name, loadinfo);
+}
+</pre>
+    <p>BriJJ is asynchronous due to the way Javascript works so it won't halt the web
+    browser while we are waiting for the background HTTP request to return.
+    So the parameter <code>loadinfo</code> names a function to be called when the
+    call has returned.</p>
+    
+    <p>On the server, BriJJ calls the <code>Demo.sayHello()</code> Java method:</p>
+    
+<pre>
+public String sayHello(String name) {
+    return "Hello, " + name;
+}
+</pre>
+    
+    <p>When this method returns, BriJJ calls <code>loadinfo()</code> function which
+    moves the text to the reply span:</p>
+    
+
+    <p>We could simplify things by writing the 2 Javascript functions together like
+    this:</p>
+    
+    <p>And that's it. In effect we have written much less than 10 lines of code to
+    get data from the server, and display it in the browser.</p>
+    
+  </div>
+
+</body>
+</html>
