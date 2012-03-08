@@ -3,18 +3,20 @@
 <head>
   <title>File Upload Demo</title>
   <meta http-equiv="Content-Type" content="text/html; charset=us-ascii" />
-  <script type='text/javascript' src='../tabs/tabs.js'> </script>
-  <script type='text/javascript' src='../brijj/engine.js'> </script>
-  <script type='text/javascript' src='../brijj/interface/UploadDownload.js'> </script>
-  <script type="text/javascript" src='download.js'> </script>
-  <link rel="stylesheet" type="text/css" href="../tabs/tabs.css" />
-  <link rel="stylesheet" type="text/css" href="../generic.css" />
+  <script type='text/javascript' src='tabs.js'> </script>
+  <script type='text/javascript' src='/brijj.js'> </script>
+  <script type="text/javascript">
+	  function downloadPdfFile() {
+		  var pdftext = document.getElementById('pdftext').value;
+		  UploadDownload.downloadPdfFile(pdftext, function(data) {
+	    	brijj.openInDownload(data);
+	  	});
+	  }
+  </script>
 </head>
 <body onload="Tabs('tabList');">
-<div id="page-title">[
-  <a href="http://r0kit.net/brijj/">brijj Website</a> |
-  <a href="..">Web Application Index</a>
-]</div>
+	<div>[ <a href="index.html">Demo home page</a> ] </div>
+
 
 <h1>File Download</h1>
 
@@ -25,7 +27,7 @@
   <li><a data-tab="explainDiv">How it works</a></li>
 </ul>
 
-  <div id="demoDiv">
+  <div id="demoDiv" class="tabBody">
 
     <p>Please enter some text to make part of a PDF download.</p>
 
@@ -44,7 +46,7 @@
 
   </div>
 
-  <div id="explainDiv">
+  <div id="explainDiv" class="tabBody">
 <p>The client code simply gets the value of the input text field and sends it
 to the <code>UploadDownload.downloadPdfFile()</code> server function, and when
 the server replies with a PDF file, we open it for download.</p>
@@ -53,7 +55,7 @@ function downloadPdfFile() {
   var pdftext = document.getElementById('pdftext').value;
 
   UploadDownload.downloadPdfFile(pdftext, function(data) {
-    brijj.engine.openInDownload(data);
+    brijj.openInDownload(data);
   });
 }
 </pre>
@@ -65,8 +67,6 @@ ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
 Document document = new Document();
 PdfWriter.getInstance(document, buffer);
-
-document.addCreator("brijj.war using iText");
 document.open();
 document.add(new Paragraph(contents));
 document.close();

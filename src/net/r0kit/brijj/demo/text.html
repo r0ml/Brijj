@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simple Text Generation Demo</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=us-ascii" />
+  <script type='text/javascript' src='../brijj.js'> </script>
+  <script type="text/javascript">
+  function update() {
+    var name = document.getElementById("demoName").value;
+    Demo.sayHello(name, loadinfo);
+  }
+  function loadinfo(data) {
+      document.getElementById("demoReply").innerHTML = data;
+  }
+  
+</script>
+</head>
+
+<body onload="Tabs('tabList');">
+<div>[ <a href="index.html">Demo home page</a> ] </div>
+
+<h1>Dynamically Updating Text</h1>
+
+<p>This is a simple demonstration of how to dynamically update a web-page with
+text fetched from a web server.</p>
+
+<div id="demoDiv" class="tabBody">
+      Name:
+      <input type="text" id="demoName" value="Joe"/>
+      <input type="button" id="demoSend" value="Send" onclick="update()"/>
+      <div style="padding: 4px 0 0 0;">
+      Reply: <span id="demoReply" style="padding: 0 4px 0 4px;"></span>
+      </div>
+  </div>
+</body>
+</html>

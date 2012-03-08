@@ -1,139 +1,50 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 <head>
-  <title>BriJJ - Test Home</title>
-  <script type='text/javascript' src='brijj/engine.js'></script>
-  <script type='text/javascript' src='brijj/interface/Intro.js'></script>
-  <script>
-    function init() {
-      // This turns off the no-javascript message
-      document.getElementById("start").style.display = "none";
-      // This checks for file: URLs and loading problems
-      if (window.brijj == null || window.brijj.engine == null) {
-        document.getElementById("file").style.display = "block";
-        return;
-      }
-      // Turn on the generic error div
-      document.getElementById("error").style.display = "block";
-      // Load a message from the server
-      Intro.getInsert(load);
-    }
+<title>BriJJ - Test Home</title>
+<script type='text/javascript' src='../brijj.js'></script>
+<script>
+	function init() {
+		Demo.getInsert(load);
+	}
 
-    function load(data) {
-      document.getElementById("error").style.display = "none";
-      document.getElementById("reply").innerHTML = data[0];
-      document.getElementById("version").innerText = "(Version " + data[1] + ")";
-      document.getElementById("reply").style.display = "block";
-    }
-  </script>
-  <link rel="stylesheet" type="text/css" href="generic.css" />
+	function load(data) {
+		document.getElementById("reply").innerHTML = data[0];
+		document.getElementById("version").innerText = "(Version " + data[1] + ")";
+		document.getElementById("reply").style.display = "block";
+	}
+</script>
+<link rel="stylesheet" type="text/css" href="generic.css" />
 </head>
 
 <body onload="init()">
 
-<div id="page-title">[
-  <a href="http://r0kit.net/brijj/index.html">Brijj has no website (yet)</a>
-]</div>
+	<h1>Welcome to BriJJ <small id="version"></small></h1>
 
-<h1>Welcome to BriJJ <small id="version"></small></h1>
+	<p>Brijj (Browser Remote Interface from Javascript to Java) 
+	is an Ajax remoting framework for Java to make it easy for web pages
+	to interact with server-side Java classes.</p>
 
-<p>Brijj is an Ajax remoting framework for Java to make it easy for web pages to
-interact with Java classes.</p>
+	<div id="bodyDiv">
+			The generated <a href="../">test pages</a> let you experiment with the 
+			remote methods defined for this installation.
+		<br>Working examples of BriJJ:
+		<ul>
+			<li><strong>Getting Started</strong> (Hello, World).</li>
+			<li><ul>
+				<li><a href="text.html">Manipulating strings</a></li>
+				<li><a href="edit.html">Editable Table</a> allows a user to edit a table of data</li>
+				<li><a href="search.html">Search a table of data</a></li>
+			</ul></li>
+			<li><strong>Uploads and Downloads</strong></li>
+			<li><ul>
+				<li><a href="download.html">Downloading</a> a file - in this case with custom PDF generation</li>
+				<li><a href="upload.html">Uploading a file</a></li>
+			</ul></li>
+		</ul>
+	</div>
 
-<div id="body">
-  <h2>Inside this Demo</h2>
-  <p>The generated <a href='brijj'>configuration / test pages</a> show how BriJJ is setup.</p>
-  <p>Documented examples of how BriJJ works:</p>
-  <ul>
-    <li><strong>Getting Started</strong> with BriJJ:</li>
-    <ul>
-      <li>First steps: Start with <a href="simple/text.html">updating some simple text</a> and then <a href="simple/resource.html">including one page in another</a></li>
-      <li>More visual: <a href="people/edit.html">Editable Table</a> allows a user to edit a table of data, or you can <a href="people/search.html">search similar data</a></li>
-    </ul>
-    <li><strong>Binary</strong> file handling:</li>
-    <ul>
-      <li><a href="simple/upload.html">File upload</a> is easy - this example shows image manipulation</li>
-      <li><a href="simple/download.html">Download</a> is just as easy - this time with custom PDF generation</li>
-    </ul>
-  </ul>
-</div>
-
-<div id="check"> </div>
-
-<div id="start">
-  <p><strong>BriJJ is testing installation ...</strong></p>
-  <p>
-    BriJJ uses JavaScript to make some initial checks. If you can see this message
-    then either you are a very fast reader, or JavaScript is not working
-    properly in your browser.
-  </p>
-  <p>
-    Since AJAX requires JavaScript, you will need to enable JavaScript in your
-    browser before you can test BriJJ. Some very old browsers like IE 4.0 have
-    very out of date support for JavaScript and are currently unsupported.
-    Please upgrade your browser.
-  </p>
-</div>
-
-<div id="reply" style="display:none;">
-  <p><strong>BriJJ is partially working</strong></p>
-  <p>
-    BriJJ has received test data from the server, however for some reason this
-    data was mangled.
-  </p>
-</div>
-
-<div id="file" style="display:none;">
-  <p><strong>Missing BriJJ JavaScript Functions</strong></p>
-  <p>
-    This is a fairly advanced page that tests BriJJ to check that everything is
-    setup properly for you.
-  </p>
-  <p>
-    It appears that you may be attempting to run BriJJ outside a servlet container
-    (possibly using a file: URL), or that the servlet engine has failed to load
-    the BriJJ servlet.
-  </p>
-  <p>
-    The problem is that this page failed to load resources from BriJJ. You might
-    try visiting the BriJJ <a href='brijj/'>configuration/test pages</a> to see
-    what happens when you access BriJJ directly. Pay careful attention to error
-    messages on the app-server console in trying to diagnose what is wrong. 
-  </p>
-  <p>
-    Also there could be an issue with your browser. Try viewing this page in a
-    different browser, particularly try a browser with a JavaScript console.
-    Errors reported in the JavaScript console could help diagnose the problem.
-  </p>
-</div>
-
-<div id="error" style="display:none;">
-  <p><strong>BriJJ is testing installation ...</strong></p>
-  <p>
-    This is a fairly advanced page that tests BriJJ. If you can see this message
-    for a prolonged period of time then you should check the following:
-  </p>
-  <ul>
-    <li>
-      Can you see the <a href="brijj/">test pages</a>?<br/>
-      If not it is likely that BriJJ has not deployed in your web server properly;
-      Check the web server console and log files for error messages.
-    </li>
-    <li>
-      If you can see the <a href="brijj/">test pages</a> then BriJJ is loaded but is
-      something is preventing BriJJ working. Check your browser JavaScript console
-      for error messages, or see the <a href="http://r0kit.net/brijj">main
-      BriJJ website</a> for more information.
-    </li>
-  </ul>
-  <p>
-    If none of these steps fixes the error, please report it to the
-    <a href="http://r0kit.net/brijj/support">BriJJ mailing list</a>, including
-    your browser, server, OS configuration and any error messages that appeared
-    either in the browser (including the JavaScript console if one exists) and
-    the server console log.
-  </p>
-</div>
+	<div id="reply" style="display:none"></div>
 
 </body>
 </html>

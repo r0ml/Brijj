@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>File Upload Demo</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=us-ascii" />
+  <script type='text/javascript' src='../brijj.js'> </script>
+  <script type="text/javascript"> 
+  function uploadFiles() {
+    var image = document.querySelector('[name=uploadImage]');
+    var text = document.querySelector('[name=text]').value;
+    var color = document.querySelector('[name=color]').value;
+
+    UploadDownload.uploadFiles(image, text, color, function(data) {
+      document.getElementById('image').src = data;
+    });
+  }
+</script>
+</head>
+<body>
+<div id="page-title">[
+  <a href="http://r0kit.net/brijj/">BRIJJ Website</a> |
+  <a href="..">Web Application Index</a>
+]</div>
+
+<h1>Asynchronous FileUpload</h1>
+
+<p>This is an example of uploading files via Brijj</p>
+
+ <div id="demoDiv">
+
+    <p>Please select an image file for uploading. A simple transform
+    will take the image and scale it to 200 pixels square, and emboss on it the
+    supplied text.</p>
+
+  	<table class="plain grey form">
+      <tr>
+        <th>Image:</th>
+        <td><input type="file" name="uploadImage" size="30"/></td>
+      </tr>
+      <tr>
+        <th>Text:</th>
+        <td><input type="text" name="text" size="30"/></td>
+      </tr>
+      <tr>
+        <th>Color:</th>
+        <td>#<input type="text" name="color" value="FFFFFF" size="7"/></td>
+      </tr>
+      <tr>
+        <th></th>
+      	<td>
+          <button onclick="uploadFiles()">Upload</button>
+      	</td>
+      </tr>
+  	</table>
+
+    <br/>    
+    <img id="image" src="javascript:void(0);"/>
+
+  </div>
+</body>
+</html>
+  

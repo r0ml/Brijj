@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Brijj Test</title>
+<base href="${base}/"/>
+<script type='text/javascript' src="brijj.js"></script>
+<script type='text/javascript'>
+	function objectEval(text) {
+		text = text.replace(/\\n/g, ' ');
+		text = text.replace(/\\r/g, ' ');
+		return eval('('+text+')');
+	}
+	function setReply(id,val) {
+		var elem = document.getElementById(id);
+		if (val.constructor.toString().match(/XMLHttpRequest/)) {
+			elem.innerHTML=val.responseText;
+			var qsa = elem.querySelectorAll("script");
+			for(var i=0;i<qsa.length;i++) {
+				if (qsa[i].type.match(/^dojo/)) continue;
+				try { eval(qsa[i].textContent); } catch(z) { 
+					console.log(z); }
+			}
+			return;
+		}
+		
+		if (val instanceof HTMLImageElement) {
+		  elem.innerHTML="";
+		  elem.appendChild(val);
+		  return;
+		}
+		window.console.log(val);
+		if ("object"==typeof val) val = JSON.stringify(val);
+		elem.innerHTML=val;
+		var style=elem.style;
+		style.webkitTransition=style.transition=style.MozTransition="none";
+		style.backgroundColor = "#FFAA88";
+		setTimeout( function() {
+		style.webkitTransition=style.transition=style.MozTransition="background-color 5.5s ease-in";
+		style.backgroundColor = "#EEEEEE";
+		}, 1);
+	}
+	
+	function doClick(s,m,i,l) {
+		var args = [];
+		for(var j=0;j<l;j++) {
+		  var te = document.getElementById("p"+i+"_"+j);
+		  if (te.type=='file') args.push(te)
+		  else args.push( objectEval(te.value) );
+		}
+		var fn = (function(x) { setReply("d"+i,x); } );
+		args.push(fn);
+		var o = window[s];
+		o[m].apply(o,args);
+	}
+	
+</script>
+
+<style>
+ul > li {
+	margin: 20px 0 0 0;
+}
+ul > li > p {
+	margin:2px;
+}
+div.output {
+	padding: 2px 4px 2px 4px;
+}
+
+input.itext {
+	font-size: smaller;
+	background: #EEEEEE;
+	border: 1px;
+}
+
+input.ibutton {
+	border: 1px outset;
+	margin: 2px;
+	padding: 2px;
+	background: #DEFECE;
+}
+
+span.reply {
+	background: #ffffdd;
+	white-space: pre;
+}
+
+span.warning {
+	font-size: smaller;
+	color: red;
+}
+</style>
+</head>
+
+<body>
+	<h2>Methods For: ${moduleName}</h2>
+	<blockquote style="color:grey;">
+	To use this class in your javascript you will need the following script includes:
+	<pre><code>
+&lt;script type='text/javascript' src='<a href="${base}/brijj.js">brijj.js</a>'&gt;&lt;/script&gt;
+		Replies from Brijj are shown with a pink background. <br /> 
+		The inputs are evaluated as Javascript so strings must be quoted.
+    </code></pre>
+	</blockquote>
+	<ul>
+	${methods}
+	</ul>
+	
+	<hr>
+	Back to <a href='${base}/'>module index</a>.
+</body>
+</html>
+

@@ -1,5 +1,5 @@
 
-package net.r0kit.brijj.demo.simple;
+package net.r0kit.brijj.demo;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -8,18 +8,11 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import net.r0kit.brijj.Brijj;
 import net.r0kit.brijj.FileTransfer;
 import net.r0kit.brijj.RemoteRequestProxy;
-
-import com.itextpdf.text.Document;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.pdf.PdfWriter;
-
 
 public class UploadDownload extends RemoteRequestProxy {
     /**
@@ -39,38 +32,19 @@ public class UploadDownload extends RemoteRequestProxy {
         return new FileTransfer(uploadImage, "png", request);
     }
 
-    /**
-     * Generates a PDF file with the given text
-     * http://itext.ugent.be/itext-in-action/
-     * @return A PDF file as a byte array
-     */
-    @Brijj.RemoteMethod public FileTransfer downloadPdfFile(String contents) throws Exception
-    {
-        if (contents == null || contents.length() == 0)
-        {
-            contents = "[BLANK]";
-        }
-
+    @Brijj.RemoteMethod public FileTransfer downloadPdfFile(String contents) {
+        if (contents == null || contents.length() == 0) contents = "[BLANK]";
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-
-        Document document = new Document();
+/*        Document document = new Document();
         PdfWriter.getInstance(document, buffer);
-
-        document.addCreator("BRIJJ using iText");
         document.open();
         document.add(new Paragraph(contents));
         document.close();
-
+        */
         return new FileTransfer("example.pdf", "application/pdf", buffer.toByteArray(), request);
     }
 
-    /**
-     * Voodoo to scale the image to 200x200
-     * @param uploadImage The image to work on
-     * @return The altered image
-     */
-    private BufferedImage scaleToSize(BufferedImage uploadImage)
-    {
+    @Brijj.RemoteMethod public BufferedImage scaleToSize(BufferedImage uploadImage) {
         AffineTransform atx = new AffineTransform();
         atx.scale(200d / uploadImage.getWidth(), 200d / uploadImage.getHeight());
         // AffineTransformOp.TYPE_BILINEAR is very slow
@@ -108,7 +82,7 @@ public class UploadDownload extends RemoteRequestProxy {
                 output = buffer.substring(row * CHARS_PER_LINE);
             }
 
-            g2d.setFont(new Font("SansSerif", Font.BOLD, 16));
+            g2d.setFont(new Font("Serif", Font.BOLD, 16));
             g2d.setColor(UploadDownload.decodeHtmlColorString(color));
             g2d.drawString(output, 5, (row + 1) * CHARS_PER_LINE);
         }
@@ -116,54 +90,27 @@ public class UploadDownload extends RemoteRequestProxy {
         return uploadImage;
     }
 
-    /**
-     * Decode an HTML color string like '#F567BA;' into a {@link Color}
-     * @param colorString The string to decode
-     * @return The decoded color
-     * @throws IllegalArgumentException if the color sequence is not valid
-     */
-    public static Color decodeHtmlColorString(String colorString)
-    {
-        Color color;
-    
-        if (colorString.startsWith("#"))
-        {
-            colorString = colorString.substring(1);
-        }
-        if (colorString.endsWith(";"))
-        {
-            colorString = colorString.substring(0, colorString.length() - 1);
-        }
-    
-        int red;
-        int green;
-        int blue;
-        switch (colorString.length())
-        {
+    public static Color decodeHtmlColorString(String colorString) {
+        if (colorString.startsWith("#")) colorString = colorString.substring(1);
+        if (colorString.endsWith(";")) colorString = colorString.substring(0, colorString.length() - 1);
+        switch (colorString.length()) {
         case 6:
-            red = Integer.parseInt(colorString.substring(0, 2), 16);
-            green = Integer.parseInt(colorString.substring(2, 4), 16);
-            blue = Integer.parseInt(colorString.substring(4, 6), 16);
-            color = new Color(red, green, blue);
-            break;
+            return new Color(
+                Integer.parseInt(colorString.substring(0, 2), 16),
+                Integer.parseInt(colorString.substring(2, 4), 16),
+                Integer.parseInt(colorString.substring(4, 6), 16));
         case 3:
-            red = Integer.parseInt(colorString.substring(0, 1), 16);
-            green = Integer.parseInt(colorString.substring(1, 2), 16);
-            blue = Integer.parseInt(colorString.substring(2, 3), 16);
-            color = new Color(red, green, blue);
-            break;
+          return new Color(
+              Integer.parseInt(colorString.substring(0, 1), 16),
+              Integer.parseInt(colorString.substring(1, 2), 16),
+              Integer.parseInt(colorString.substring(2, 3), 16));
         case 1:
-            red = green = blue = Integer.parseInt(colorString.substring(0, 1), 16);
-            color = new Color(red, green, blue);
-            break;
+            int g = Integer.parseInt(colorString.substring(0, 1), 16);
+            return new Color(g,g,g);
         default:
             throw new IllegalArgumentException("Invalid color: " + colorString);
         }
-        return color;
     }
 
-    /**
-     * 
-     */
     private static final int CHARS_PER_LINE = 21;
 }

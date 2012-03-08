@@ -1,4 +1,3 @@
-
 package net.r0kit.brijj;
 
 import java.awt.image.BufferedImage;
@@ -16,6 +15,9 @@ import javax.servlet.http.HttpServletRequest;
 
 public class FileTransfer {
   /** A ctor for the 3 things browsers tell us about the uploaded file */
+  public FileTransfer(BufferedImage image, String type) {
+    this(image, null, type, null);
+  }
   public FileTransfer(BufferedImage image, String type, HttpServletRequest req) {
     this(image, null, type, req);
   }
@@ -24,7 +26,6 @@ public class FileTransfer {
     this.req = req;
     this.filename = f;
     this.mimeType = "image/" + type;
-    
     try {
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
       ImageIO.write(image, type, bos);
@@ -42,28 +43,20 @@ public class FileTransfer {
     this.size = bytes.length;
     this.inputStream = new ByteArrayInputStream(bytes);
   }
-  public FileTransfer(FormField ff, HttpServletRequest q) {
+/*  public FileTransfer(FormField ff, HttpServletRequest q) {
     this.req = q;
-    this.filename = ff.getName();
-    this.mimeType = ff.getMimeType();
-    this.size = ff.getFileSize();
-    this.inputStream = ff.getInputStream();
+    this.filename = ff.name;
+    this.mimeType = ff.mimeType;
+    this.size = ff.fileSize;
+    this.inputStream = ff.inputStream;
   }
-  public FileTransfer(String f, String m, long z, final InputStream i, HttpServletRequest req) {
-    this.req = req;
-    this.filename = f;
-    this.mimeType = m;
-    this.size = z;
-    this.inputStream = i;
-  }
+  */
   public String getPath() {
     int z = hashCode();
     timeSaved = System.currentTimeMillis();
     instances.put(z, this);
-    return "'" + req.getContextPath() + req.getServletPath() + "/download/" + z + "'";
+    return "'" +  ( req == null ? "" : (req.getContextPath() + req.getServletPath() + "/")) +"download/" + z + "'";
   }
-  /** Returns an {@link InputStream} that can be used to retrieve the contents of
-   * the file. */
   public InputStream getInputStream() {
     if (inputStream != null) return inputStream;
     else return null;
@@ -72,38 +65,44 @@ public class FileTransfer {
   public final String filename;
   public final String mimeType;
   public long size;
-  private InputStream inputStream;
+  public InputStream inputStream;
 
   public static FileTransfer get(int z) {
     FileTransfer t = instances.get(z);
     if (t != null) instances.remove(z);
     return t;
   }
-
   public BufferedImage asImage() {
-    try { return ImageIO.read(getInputStream()); } catch(IOException ioe) { return null; }
+    try {
+      return ImageIO.read(getInputStream());
+    } catch (IOException ioe) {
+      return null;
+    }
   }
-  
   public String asString() {
-    try { return new String(getBytes()); } catch(IOException ioe) { return null; }
+    try {
+      return new String(getBytes());
+    } catch (IOException ioe) {
+      return null;
+    }
   }
   private byte[] getBytes() throws IOException {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    byte[] buffer= new byte[4096];
+    byte[] buffer = new byte[4096];
     InputStream i = getInputStream();
-    while(true) {
+    while (true) {
       int n = i.read(buffer);
       if (n <= 0) break;
-      bos.write(buffer,0,n);
+      bos.write(buffer, 0, n);
     }
     return bos.toByteArray();
   }
-  
   public Object asObject() {
     if (mimeType.startsWith("text/")) return asString();
     else if (mimeType.startsWith("image/")) return asImage();
-    else return null;
+    else return this;
   }
+
   public boolean inline = true;
   public long timeSaved;
   private HttpServletRequest req;
