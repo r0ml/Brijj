@@ -205,20 +205,7 @@ public class CallHandler {
   }
 
   private static Object readObject(Part z) {
-//      this.name = z.getName();
-//      this.mimeType = z.getContentType();
-//      this.fileSize = z.getSize();
-//      isFile = z.getHeader("content-disposition").contains("filename=");
-//      try { this.inputStream = z.getInputStream(); }
-//      catch(IOException iox) {}
-//    }
-
-//      if (hasBeenRead == true) {
-//        throw new RuntimeException("reading a FormField twice should never happen -- if it does, the inputStream needs to be reset");
-
-    //if (mimeType.startsWith("text/")) return asString();
-
-    try {
+   try {
       if (z.getContentType().startsWith("image/")) return ImageIO.read(z.getInputStream());
       else if (z.getContentType().startsWith("text/")) return Brijj.readAllTextFrom(new InputStreamReader(z.getInputStream(),"UTF-8"));
       else return Brijj.readAllBytesFrom(z.getInputStream());
@@ -257,36 +244,15 @@ public class CallHandler {
         HashMap<String, Object> hm = new HashMap<String, Object>();
         StringTokenizer st = new StringTokenizer(v.substring(1, v.length() - 1), ",");
         while (st.hasMoreElements()) {
-          KeyValue tv = splitInbound(urlDecode(st.nextToken()));
-          hm.put(tv.key, readObject(tv.value));
+          String tkn = urlDecode(st.nextToken());
+          int n = tkn.indexOf(':');
+          hm.put(tkn.substring(0,n).trim(), readObject(tkn.substring(n+1)));
         }
         return hm;
       }
       default: throw new RuntimeException("unknown inbound parameter type: "+t);
       }
     }
-
-    static class KeyValue {
-      public String key, value;
-      public KeyValue(String t, String v) {
-        key = t;
-        value = v;
-      }
-    }
-
-    static KeyValue splitInbound(String data) {
-      int n = data.indexOf(':');
-      return new KeyValue(data.substring(0,n).trim(), data.substring(n+1));
-    }
- /*   Object[] parseParameters(HttpServletRequest request, List<FormField> extraParameters) throws ClassNotFoundException, IOException {
-      List<Object> inboundContext = new ArrayList<Object>();
-      for (FormField formField : extraParameters) {
-        inboundContext.add(formField.isFile ? new FileTransfer(formField, request) : readObject(formField.getString()));
-      }
-      return inboundContext.toArray();
-    } 
-   */
-    
     static String urlDecode(String value) {
       try { return URLDecoder.decode(value, "UTF-8"); }
       catch (UnsupportedEncodingException ignore) { return value; }
