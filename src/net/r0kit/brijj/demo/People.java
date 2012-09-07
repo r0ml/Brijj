@@ -10,7 +10,6 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.r0kit.brijj.Brijj;
 import net.r0kit.brijj.RemoteRequestProxy;
 
 public class People extends RemoteRequestProxy {
@@ -20,25 +19,25 @@ public class People extends RemoteRequestProxy {
   public People(HttpServletRequest q, HttpServletResponse s) {
     super(q, s);
   }
-  @Brijj.RemoteMethod public Collection<Person> getSmallCrowd() {
+  public Collection<Person> getSmallCrowd() {
     synchronized (smallCrowd) {
       return smallCrowd.values();
     }
   }
-  @Brijj.RemoteMethod public String setPerson(Person person) {
+  public String setPerson(Person person) {
     synchronized (smallCrowd) {
       smallCrowd.put(person.id, person);
     }
     return "Updated values for " + person;
   }
-  @Brijj.RemoteMethod public String deletePerson(String id) {
+  public String deletePerson(String id) {
     Person person = null;
     synchronized (smallCrowd) {
       person = smallCrowd.remove(id);
     }
     return person == null ? "Person does not exist" : "Deleted " + person;
   }
-  @Brijj.RemoteMethod public List<Person> getMatchingFromLargeCrowd(String filter) {
+  public List<Person> getMatchingFromLargeCrowd(String filter) {
     List<Person> reply = new ArrayList<Person>();
     Pattern regex = Pattern.compile(filter, Pattern.CASE_INSENSITIVE);
     for (Person person : largeCrowd.values()) {

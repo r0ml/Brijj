@@ -14,7 +14,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import net.r0kit.brijj.Brijj.Remotable;
+import net.r0kit.brijj.RemoteRequestProxy.Remotable;
 
 public class Json {
   

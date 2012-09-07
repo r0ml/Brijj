@@ -3,10 +3,6 @@ package net.r0kit.brijj.demo;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import net.r0kit.brijj.Brijj;
-import net.r0kit.brijj.Brijj.Documentation;
-import net.r0kit.brijj.Brijj.Eg;
-import net.r0kit.brijj.Brijj.RemoteMethod;
 import net.r0kit.brijj.BrijjServlet;
 import net.r0kit.brijj.RemoteRequestProxy;
 import org.eclipse.jetty.server.Handler;
@@ -41,14 +37,14 @@ public class BrijjDemo {
     }
     
     @Documentation(text="Supply the name of a person who will be greeted when the button is pressed")
-    @Brijj.RemoteMethod public String sayHello(@Eg(value="Joe") String name) {
+    public String sayHello(@Eg(value="Joe") String name) {
       return "<span style=\"color: rgb(204,153,204);\">Hello, <b style=\"background: rgb(153,204,153); color: rgb(104,13,104); padding: 6px; \">" + name+"</b></span>";
     }
-    @Brijj.RemoteMethod public String[] getInsert() {
+    public String[] getInsert() {
       return new String[] { "<p><strong style=color:red;>BriJJ is bridging!</strong></p>", "1.3.1" };
     }
     @Documentation(text="This just prefixes a constant string to the supplied value")
-    @Brijj.RemoteMethod public String getError(@Eg(value="bogus") String s) throws IOException {
+    public String getError(@Eg(value="bogus") String s) throws IOException {
       throw new IOException("invalid argument: " + s);
     }
   }
@@ -56,38 +52,38 @@ public class BrijjDemo {
     public TestTypes(HttpServletRequest q, HttpServletResponse p) {
       super(q, p);
     }
-    @RemoteMethod public int getInt() {
+    public int getInt() {
       return 1000000000;
     }
-    @RemoteMethod public double getDouble() {
+    public double getDouble() {
       return 1000;
     }
-    @RemoteMethod public int[] getIntArray() {
+    public int[] getIntArray() {
       return new int[] { 3, 6, 9, 101, 4324324 };
     }
-    @RemoteMethod public double[] getDoubleArray() {
+    public double[] getDoubleArray() {
       return new double[] { 3, 6, 9, 101, 434343 };
     }
-    @RemoteMethod public int sumArray(int[] a) {
+    public int sumArray(int[] a) {
       int b = 0;
       for (int c : a)
         b += c;
       return b;
     }
-    @RemoteMethod public double productArray(double[] a) {
+    public double productArray(double[] a) {
       double b = 1;
       for (double c : a)
         b *= c;
       return b;
     }
-    @RemoteMethod public double crossProduct(int[] a, double[] b) {
+    public double crossProduct(int[] a, double[] b) {
       double res = 0;
       if (a.length != b.length) throw new IllegalArgumentException();
       for (int i = 0; i < a.length; i++)
         res += a[i] * b[i];
       return res;
     }
-    @RemoteMethod public double productReals(double... ds) {
+    public double productReals(double... ds) {
       double res = 1;
       for (double c : ds)
         res *= c;

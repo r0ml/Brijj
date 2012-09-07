@@ -3,8 +3,8 @@ package net.r0kit.brijj.demo;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import net.r0kit.brijj.Brijj.Remotable;
 import net.r0kit.brijj.Cast.Castable;
+import net.r0kit.brijj.RemoteRequestProxy.Remotable;
 
 @Castable public class Person implements Remotable {
   public Object toRemote() {

@@ -14,7 +14,6 @@ import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 
 public class FileTransfer {
-  /** A ctor for the 3 things browsers tell us about the uploaded file */
   public FileTransfer(BufferedImage image, String type) {
     this(image, null, type, null);
   }
@@ -43,14 +42,6 @@ public class FileTransfer {
     this.size = bytes.length;
     this.inputStream = new ByteArrayInputStream(bytes);
   }
-/*  public FileTransfer(FormField ff, HttpServletRequest q) {
-    this.req = q;
-    this.filename = ff.name;
-    this.mimeType = ff.mimeType;
-    this.size = ff.fileSize;
-    this.inputStream = ff.inputStream;
-  }
-  */
   public String getPath() {
     int z = hashCode();
     timeSaved = System.currentTimeMillis();

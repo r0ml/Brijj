@@ -10,7 +10,6 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import net.r0kit.brijj.Brijj;
 import net.r0kit.brijj.FileTransfer;
 import net.r0kit.brijj.RemoteRequestProxy;
 
@@ -24,7 +23,7 @@ public class UploadDownload extends RemoteRequestProxy {
      */
   public UploadDownload(HttpServletRequest r, HttpServletResponse s) { super(r,s); }
   
-    @Brijj.RemoteMethod public FileTransfer uploadFiles(BufferedImage uploadImage, String uploadFile, String color)
+    public FileTransfer uploadFiles(BufferedImage uploadImage, String uploadFile, String color)
     {
         uploadImage = scaleToSize(uploadImage);
         uploadImage = grafitiTextOnImage(uploadImage, uploadFile, color);
@@ -32,7 +31,7 @@ public class UploadDownload extends RemoteRequestProxy {
         return new FileTransfer(uploadImage, "png", request);
     }
 
-    @Brijj.RemoteMethod public FileTransfer downloadPdfFile(String contents) {
+    public FileTransfer downloadPdfFile(String contents) {
         if (contents == null || contents.length() == 0) contents = "[BLANK]";
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 /*        Document document = new Document();
@@ -44,7 +43,7 @@ public class UploadDownload extends RemoteRequestProxy {
         return new FileTransfer("example.pdf", "application/pdf", buffer.toByteArray(), request);
     }
 
-    @Brijj.RemoteMethod public BufferedImage scaleToSize(BufferedImage uploadImage) {
+    public BufferedImage scaleToSize(BufferedImage uploadImage) {
         AffineTransform atx = new AffineTransform();
         atx.scale(200d / uploadImage.getWidth(), 200d / uploadImage.getHeight());
         // AffineTransformOp.TYPE_BILINEAR is very slow
