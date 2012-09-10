@@ -32,7 +32,7 @@ public abstract class RemoteRequestProxy {
 	 * list of my subclasses, I wouldn't need to register those subclasses */
 	public static void register(Class<? extends RemoteRequestProxy>... cls) {
 		for (Class<? extends RemoteRequestProxy> cl : cls) {
-			if (RemoteRequestProxy.class.isAssignableFrom(cl) || Remotable.class.isAssignableFrom(cl)) proxies.put(cl.getClass().getSimpleName(),
+			if (RemoteRequestProxy.class.isAssignableFrom(cl) || Remotable.class.isAssignableFrom(cl)) proxies.put(cl.getSimpleName(),
 					cl);
 			else throw new RuntimeException("cannot register " + cl);
 		}
