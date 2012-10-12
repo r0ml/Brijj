@@ -3,7 +3,6 @@
 <head>
   <title>File Upload Demo</title>
   <meta http-equiv="Content-Type" content="text/html; charset=us-ascii" />
-  <script type='text/javascript' src='tabs.js'> </script>
   <script type='text/javascript' src='/brijj.js'> </script>
   <script type="text/javascript">
 	  function downloadPdfFile() {
@@ -14,23 +13,12 @@
 	  }
   </script>
 </head>
-<body onload="Tabs('tabList');">
+<body>
 	<div>[ <a href="index.html">Demo home page</a> ] </div>
-
-
-<h1>File Download</h1>
-
-<p>This is an example of downloading files via brijj</p>
-
-<ul id="tabList">
-  <li><a data-tab="demoDiv">Demo</a></li>
-  <li><a data-tab="explainDiv">How it works</a></li>
-</ul>
-
-  <div id="demoDiv" class="tabBody">
-
+  <h1>File Download</h1>
+  <p>This is an example of downloading files via brijj</p>
+  <div id="demoDiv">
     <p>Please enter some text to make part of a PDF download.</p>
-
   	<table class="plain grey form">
       <tr>
         <th>Text for PDF file:</th>
@@ -43,38 +31,6 @@
       	</td>
       </tr>
   	</table>
-
   </div>
-
-  <div id="explainDiv" class="tabBody">
-<p>The client code simply gets the value of the input text field and sends it
-to the <code>UploadDownload.downloadPdfFile()</code> server function, and when
-the server replies with a PDF file, we open it for download.</p>
-<pre>
-function downloadPdfFile() {
-  var pdftext = document.getElementById('pdftext').value;
-
-  UploadDownload.downloadPdfFile(pdftext, function(data) {
-    brijj.openInDownload(data);
-  });
-}
-</pre>
-
-<p>The server function uses iText to create a PDF file, and returns it in a
-FileTransfer object:</p>
-<pre>
-ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-
-Document document = new Document();
-PdfWriter.getInstance(document, buffer);
-document.open();
-document.add(new Paragraph(contents));
-document.close();
-
-return new FileTransfer("example.pdf", "application/pdf", buffer.toByteArray());
-</pre>
-  </div>
-
 </body>
 </html>
-  

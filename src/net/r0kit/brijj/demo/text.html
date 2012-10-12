@@ -12,11 +12,10 @@
   function loadinfo(data) {
       document.getElementById("demoReply").innerHTML = data;
   }
-  
 </script>
 </head>
 
-<body onload="Tabs('tabList');">
+<body>
 <div>[ <a href="index.html">Demo home page</a> ] </div>
 
 <h1>Dynamically Updating Text</h1>
@@ -24,7 +23,7 @@
 <p>This is a simple demonstration of how to dynamically update a web-page with
 text fetched from a web server.</p>
 
-<div id="demoDiv" class="tabBody">
+  <div id="demoDiv">
       Name:
       <input type="text" id="demoName" value="Joe"/>
       <input type="button" id="demoSend" value="Send" onclick="update()"/>

@@ -106,11 +106,10 @@ import net.r0kit.brijj.RemoteRequestProxy.Eg;
   }
   public void doTest(HttpServletRequest req, HttpServletResponse resp, String src) throws IOException {
     String h = req.getRequestURL().toString();
-    h = h.substring(0,h.length()-req.getPathInfo().length());
+    h = h.substring(0, h.length() - req.getPathInfo().length());
     resp.setContentType("text/html");
     resp.getWriter().println(generateTestPage(h, src));
   }
-
   public void doEngine(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     InputStream raw = null;
     String rsrc = null;
@@ -136,13 +135,12 @@ import net.r0kit.brijj.RemoteRequestProxy.Eg;
     resp.setHeader("ETag", "\"" + lastModified + '\"');
     PrintWriter out = resp.getWriter();
     out.print(rsrc);
-    
-    for(String rpn : RemoteRequestProxy.getProxyNames() ) {
+    for (String rpn : RemoteRequestProxy.getProxyNames()) {
       try {
         RemoteRequestProxy rp = RemoteRequestProxy.getModule(rpn, null, null);
-      String s = rp.generateInterfaceScript(req.getContextPath() + req.getServletPath(), rpn);
+        String s = rp.generateInterfaceScript(req.getContextPath() + req.getServletPath(), rpn);
         out.println(s);
-      } catch(ClassNotFoundException ignore) {
+      } catch (ClassNotFoundException ignore) {
         System.err.println(ignore);
       }
     }
@@ -165,7 +163,6 @@ import net.r0kit.brijj.RemoteRequestProxy.Eg;
       } catch (Exception ignore) {}
     }
   }
-
   String rp(String s, String v, String n) {
     return s.replace("${" + v + "}", n);
   }
@@ -184,7 +181,7 @@ import net.r0kit.brijj.RemoteRequestProxy.Eg;
     });
     scriptName = module.getClass().getSimpleName();
     String pg = readAllTextFrom(getClass().getResource("test.html"));
-    pg = rp(pg, "base",  root);
+    pg = rp(pg, "base", root);
     pg = rp(pg, "moduleName", module.toString());
     StringBuffer sb = new StringBuffer();
     for (int i = 0; i < methods.length; i++) {
@@ -205,11 +202,11 @@ import net.r0kit.brijj.RemoteRequestProxy.Eg;
       sb.append("  " + methodName + '(');
       Annotation[][] eg = method.getParameterAnnotations();
       String[] egs = new String[eg.length];
-      for(int k=0;k<eg.length;k++) {
+      for (int k = 0; k < eg.length; k++) {
         Annotation[] egx = eg[k];
-        for(Annotation egz : egx) {
+        for (Annotation egz : egx) {
           if (egz instanceof Eg) {
-            egs[k]=((Eg)egz).value();
+            egs[k] = ((Eg) egz).value();
           }
         }
       }
@@ -217,290 +214,295 @@ import net.r0kit.brijj.RemoteRequestProxy.Eg;
       for (int j = 0; j < paramTypes.length; j++) {
         Class<?> paramType = paramTypes[j];
         // The special type that we handle transparently
-        String value="";
+        String value = "";
         if (egs[j] != null) value = "\"" + Json.escapeJavaScript(egs[j]) + "\"";
         else {
-          value = paramType == String.class ? "\"\"" : paramType == Boolean.class || paramType == Boolean.TYPE ? "true"
-              : paramType == Integer.class || paramType == Integer.TYPE || paramType == Short.class || paramType == Short.TYPE
-                  || paramType == Long.class || paramType == Long.TYPE || paramType == Byte.class || paramType == Byte.TYPE ? "0"
-                : paramType == Float.class || paramType == Float.TYPE || paramType == Double.class || paramType == Double.TYPE ? "0.0"
-                  : paramType.isArray() || Collection.class.isAssignableFrom(paramType) ? "[]"
-                    : Map.class.isAssignableFrom(paramType) ? "{}" : "";
+          value = paramType == String.class ? "\"\""
+              : paramType == Boolean.class || paramType == Boolean.TYPE ? "true" : paramType == Integer.class
+                  || paramType == Integer.TYPE || paramType == Short.class || paramType == Short.TYPE || paramType == Long.class
+                  || paramType == Long.TYPE || paramType == Byte.class || paramType == Byte.TYPE ? "0" : paramType == Float.class
+                  || paramType == Float.TYPE || paramType == Double.class || paramType == Double.TYPE ? "0.0" : paramType.isArray()
+                  || Collection.class.isAssignableFrom(paramType) ? "[]" : Map.class.isAssignableFrom(paramType) ? "{}" : "";
         }
         int sz = 20;
         if (value.length() > sz) sz = value.length() + 5;
         String input = "    <input class='itext' type='text' size='" + sz + "' value='" + value + "' id='p" + i + "_" + j
             + "' title='Will be converted to: " + paramType.getName() + "'/>";
         if (paramType == BufferedImage.class || paramType == FileTransfer.class) {
-          input = "    <input class='itext' type='file' id='p"+i+"_"+j+"'/>";
+          input = "    <input class='itext' type='file' id='p" + i + "_" + j + "'/>";
         }
         sb.append(input);
         sb.append(j == paramTypes.length - 1 ? "" : ", \n");
       }
       sb.append("  );\n");
-
       sb.append("<input class='ibutton' type='button' onclick='");
-      sb.append("doClick(\"").append(scriptName).append("\",\"")
-        .append(methodName).append("\",").append(Integer.toString(i)).append(",")
-        .append(Integer.toString(paramTypes.length)).append(")'");
-
-      sb.append(" value='Execute' title='Calls ")
-      .append(scriptName).append(".").append(methodName)
-      .append("().' /><div class=\"output\" id='d").append(Integer.toString(i))
-      .append("' class='reply'></div>")
-      .append("</li>\n");
+      sb.append("doClick(\"").append(scriptName).append("\",\"").append(methodName).append("\",").append(Integer.toString(i))
+          .append(",").append(Integer.toString(paramTypes.length)).append(")'");
+      sb.append(" value='Execute' title='Calls ").append(scriptName).append(".").append(methodName)
+          .append("().' /><div class=\"output\" id='d").append(Integer.toString(i)).append("' class='reply'></div>")
+          .append("</li>\n");
     }
     pg = rp(pg, "methods", sb.toString());
     return pg;
   }
-  
-  
-  
   public void handle(HttpServletRequest request, HttpServletResponse response) throws BrijjException, IOException {
-	    Object[] ov = parsePost(request);
-	    Object rsp = new Throwable("rsp not initialized");
-	    try {
-	      String smn = request.getPathInfo().substring("/call/".length());
-	      String[] smns = smn.split("\\.");
-	      String clazz = smns[0];
-	      Method method = findMethod(ov, clazz, smns[1]);
-	      if (method == null) { throw new IllegalArgumentException("Missing method or missing parameter converters"); }
-	      // Convert all the parameters to the correct types
-	      int destParamCount = method.getParameterTypes().length;
-	      Object[] arguments = new Object[destParamCount];
-	      for (int j = 0; j < destParamCount; j++) {
-	        Object param = ov[j];
-	        Type paramType = method.getGenericParameterTypes()[j];
-	        arguments[j] = Cast.cast(paramType, param);
-	      }
-	      RemoteRequestProxy object = RemoteRequestProxy.getModule(clazz, request, response);
-	      Object res = method.invoke(object, arguments);
-	      rsp = res;
-	    } catch (Throwable ex) {
-	      rsp = ex;
-	    }
-	    if (rsp instanceof BufferedImage) rsp = new FileTransfer((BufferedImage)rsp ,"png");
-	    writeJavascript(response, rsp);
-	  }
-	  private Object[] parsePost(HttpServletRequest req) throws BrijjException {
-		List<Object> lf = new LinkedList<Object>();
-	    if (isMultipartContent(req)) {
-	      try {Collection<Part> p = req.getParts();
-	      for(int i=0;i<p.size();i++) lf.add(null); 
-	      for (Part z : p) lf.set( Integer.valueOf(z.getName().substring(1))  , readObject(z));
-	      return lf.toArray();
-	      } catch(ServletException sx) { throw new BrijjException(sx); }
-	      catch(IOException ix) { throw new BrijjException(ix); }
-	    } else {
-	      BufferedReader in = null;
-	      try {
-	        String ce = req.getCharacterEncoding();
-	        InputStream is = req.getInputStream();
-	        InputStreamReader isr = ce != null ? new InputStreamReader(is, ce) : new InputStreamReader(is);
-	        in = new BufferedReader(isr);
-	        while (true) {
-	          String line = in.readLine();
-	          if (line == null) return lf.toArray();
-	          if (line.indexOf('&') == -1) lf.add( readObject(line) );
-	          // If there are any &'s then this must be iframe post
-	          else {
-	            StringTokenizer st = new StringTokenizer(line, "&");
-	            while (st.hasMoreTokens()) lf.add( readObject( urlDecode(st.nextToken())));
-	          }
-	        }
-	      } catch (Exception ex) {
-	        throw new BrijjException("Failed to read input", ex);
-	      } finally {
-	        if (in != null) try {
-	          in.close();
-	        } catch (IOException ex) {}
-	      }
-	    }
-	  }
-	  private static boolean isMultipartContent(HttpServletRequest request) {
-	    if (!"post".equals(request.getMethod().toLowerCase())) { return false; }
-	    String contentType = request.getContentType();
-	    if (contentType == null) { return false; }
-	    if (contentType.toLowerCase().startsWith("multipart/")) { return true; }
-	    return false;
-	  }
-	  private Method findMethod(Object[] ov, String scriptName, String methodName) throws ClassNotFoundException {
-	    int inputArgCount = ov.length;
-	    // Get a mutable list of all methods on the type specified by the creator
-	    RemoteRequestProxy module = RemoteRequestProxy.getModule(scriptName, null, null);
-	    List<Method> allMethods = new ArrayList<Method>();
-	    for (Method m : module.getClass().getMethods()) { // only use methods with matching
-	                                           // name
-	      if (m.getName().equals(methodName)) allMethods.add(m);
-	    }
-	    if (allMethods.isEmpty()) {
-	      // Not even a name match
-	      throw new IllegalArgumentException("Method name not found: " + methodName);
-	    }
-	    // Remove all the methods where we can't convert the parameters
-	    List<Method> am = new ArrayList<Method>();
-	    allMethodsLoop: for (Method m : allMethods) {
-	      Class<?>[] methodParamTypes = m.getParameterTypes();
-	      if (inputArgCount == 0 && methodParamTypes.length == 0) {
-	        am.add(m);
-	        continue;
-	      }
-	      // Remove non-varargs methods which declare less params than were passed
-	      if (!m.isVarArgs() && methodParamTypes.length < inputArgCount) continue allMethodsLoop;
-	      if (m.isVarArgs()) {
-	        int z = methodParamTypes.length - 1;
-	        if (inputArgCount < z) continue allMethodsLoop;
-	        int pc = ov.length;
-	        Object[] va = new Object[pc - z];
-	        for (int i = 0; i < pc; i++) {
-	          va[i] = ov[z + i];
-	        }
-	        ov[z]=va;
-	      } else if (methodParamTypes.length != inputArgCount) continue allMethodsLoop;
-	      // Remove methods where we can't convert the input
-	      for (int i = 0; i < methodParamTypes.length; i++) {
-	        Class<?> methodParamType = methodParamTypes[i];
-	        Object param = ov[i];
-	        if (param != null && param.getClass() == FileTransfer.class) {
-	          param = ((FileTransfer) param).asObject();
-	          ov[i]=param;
-	        }
-	        if (inputArgCount <= i && methodParamType.isPrimitive()) continue allMethodsLoop;
-	        boolean ok = false;
-	        try {
-	          Object zpar = Cast.cast(methodParamType, param);
-	          ov[i]=zpar;
-	          ok = true;
-	        } catch (CastException cx) {
-	          ok = false;
-	        }
-	        if (!ok) continue allMethodsLoop;
-	      }
-	      am.add(m);
-	    }
-	    if (am.isEmpty()) {
-	      // Not even a name match
-	      throw new IllegalArgumentException("Method not found. See logs for details");
-	    } else if (am.size() == 1) { return am.get(0); }
-	    throw new IllegalArgumentException("Multiple methods found -- the method mapping is ambiguous");
-	  }
-	  
-
-	  public void writeJavascript(HttpServletResponse response, Object obj) throws IOException {
-	    if (obj instanceof Throwable) {
-	      writeThrowable(response, (Throwable) obj);
-	      return;
-	    }
-	    PrintWriter p = response.getWriter();
-	    response.setContentType("text/html"); // "text/javascript; charset=\"utf=8\"");
-	    p.write("c:");
-	    Json.writeObject(obj, p);
-	  }
-	  
-	  private void writeThrowable(HttpServletResponse response, Throwable tt) throws IOException {
-	    PrintWriter p = response.getWriter();
-	    Throwable t = tt;
-	    while (t instanceof InvocationTargetException) t = ((InvocationTargetException) t).getTargetException();
-	    response.setContentType("text/html"); // "text/javascript; charset=\"utf=8\"");
-	    p.write("x:({javaClassName:\"");
-	    p.write(t.getClass().getName());
-	    p.write("\",message:\"");
-	    p.write(Json.escapeJavaScript(t.getMessage()));
-	    p.write("\"})");
-	  }
-
-	  private static Object readObject(Part z) {
-	   try {
-	      if (z.getContentType().startsWith("image/")) return ImageIO.read(z.getInputStream());
-	      else if (z.getContentType().startsWith("text/")) return readAllTextFrom(new InputStreamReader(z.getInputStream(),"UTF-8"));
-	      else return readAllBytesFrom(z.getInputStream());
-	    } catch (IOException ex) {
-	       return null;
-	    }
-	  }
-	  
-	  
-	  private static Object readObject(String vv) {
-	      char t = vv.charAt(0);
-	      String v = vv.substring(2);
-	      switch(t) {
-	      case 'z': return null;
-	      case 's': return urlDecode(v);
-	      case 'n':
-	        try { return v.indexOf(".") != -1 ? Double.parseDouble(v) : Integer.parseInt(v); }
-	        catch (NumberFormatException nfe) {}
-	        try { return Long.parseLong(v); } catch (NumberFormatException nfe) {}
-	        try { return Double.parseDouble(v); } catch (NumberFormatException nfe) {}
-	        throw new RuntimeException("failed to parse numeric: "+ v);
-	      case 'b': return Boolean.parseBoolean(v);
-	      case 'a': {
-	        v = v.substring(1, v.length()-1);
-	        LinkedList<Object> ll = new LinkedList<Object>();
-	        StringTokenizer st = new StringTokenizer(v, ",");
-	        while (st.hasMoreElements()) ll.add(readObject(urlDecode(st.nextToken())));
-	        Cast ca = new Cast();
-	        if(ll.get(0).getClass().equals(Integer.class)) 
-	          return ca.castToArray(Integer.TYPE, ll);
-	        else if(ll.get(0).getClass().equals(Double.class))
-	          return ca.castToArray(Double.TYPE, ll);
-	        else throw new RuntimeException("failed to parse array");
-	      }
-	      case 'o': {
-	        HashMap<String, Object> hm = new HashMap<String, Object>();
-	        StringTokenizer st = new StringTokenizer(v.substring(1, v.length() - 1), ",");
-	        while (st.hasMoreElements()) {
-	          String tkn = urlDecode(st.nextToken());
-	          int n = tkn.indexOf(':');
-	          hm.put(tkn.substring(0,n).trim(), readObject(tkn.substring(n+1)));
-	        }
-	        return hm;
-	      }
-	      default: throw new RuntimeException("unknown inbound parameter type: "+t);
-	      }
-	    }
-	    static String urlDecode(String value) {
-	      try { return URLDecoder.decode(value, "UTF-8"); }
-	      catch (UnsupportedEncodingException ignore) { return value; }
-	    }
-
-  
-	    static class BrijjException extends Exception {
-	        private static final long serialVersionUID = -707126214405629313L;
-	        public BrijjException(String message, Throwable ex) { super(message, ex); }
-	        public BrijjException(Throwable ex) { super(ex.getMessage(), ex); }
-	      }
-		  public static String readAllTextFrom(URL url) throws IOException {
-			    return readAllTextFrom(new InputStreamReader(url.openConnection().getInputStream(), "UTF-8"));
-			  }
-		  public static String readAllTextFrom(Reader r) throws IOException {
-			    StringBuilder t = new StringBuilder();
-			    char[] buffer = new char[4096];
-			    while (true) {
-			      int n = r.read(buffer);
-			      if (n <= 0) break;
-			      t.append(buffer, 0, n);
-			    }
-			    return t.toString();
-			  }
-			  public static byte[] readAllBytesFrom(InputStream i) throws IOException {
-			    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			    byte[] buffer = new byte[4096];
-			    while (true) {
-			      int n = i.read(buffer);
-			      if (n <= 0) break;
-			      bos.write(buffer, 0, n);
-			    }
-			    return bos.toByteArray();
-			  }
-			  public static void pipe(InputStream is, OutputStream os) throws IOException {
-			    byte[] buffer = new byte[4096];
-			    while (true) {
-			      int n = is.read(buffer);
-			      if (n <= 0) break;
-			      os.write(buffer, 0, n);
-			    }
-			    os.flush();
-			  }
-
-
+    Object[] ov = parsePost(request);
+    Object rsp = new Throwable("rsp not initialized");
+    try {
+      String smn = request.getPathInfo().substring("/call/".length());
+      String[] smns = smn.split("\\.");
+      String clazz = smns[0];
+      Method method = findMethod(ov, clazz, smns[1]);
+      if (method == null) { throw new IllegalArgumentException("Missing method or missing parameter converters"); }
+      // Convert all the parameters to the correct types
+      int destParamCount = method.getParameterTypes().length;
+      Object[] arguments = new Object[destParamCount];
+      for (int j = 0; j < destParamCount; j++) {
+        Object param = ov[j];
+        Type paramType = method.getGenericParameterTypes()[j];
+        arguments[j] = Cast.cast(paramType, param);
+      }
+      RemoteRequestProxy object = RemoteRequestProxy.getModule(clazz, request, response);
+      Object res = method.invoke(object, arguments);
+      rsp = res;
+    } catch (Throwable ex) {
+      rsp = ex;
+    }
+    if (rsp instanceof BufferedImage) rsp = new FileTransfer((BufferedImage) rsp, "png");
+    writeJavascript(response, rsp);
+  }
+  private Object[] parsePost(HttpServletRequest req) throws BrijjException {
+    List<Object> lf = new LinkedList<Object>();
+    if (isMultipartContent(req)) {
+      try {
+        Collection<Part> p = req.getParts();
+        for (int i = 0; i < p.size(); i++)
+          lf.add(null);
+        for (Part z : p)
+          lf.set(Integer.valueOf(z.getName().substring(1)), readObject(z));
+        return lf.toArray();
+      } catch (ServletException sx) {
+        throw new BrijjException(sx);
+      } catch (IOException ix) {
+        throw new BrijjException(ix);
+      }
+    } else {
+      BufferedReader in = null;
+      try {
+        String ce = req.getCharacterEncoding();
+        InputStream is = req.getInputStream();
+        InputStreamReader isr = ce != null ? new InputStreamReader(is, ce) : new InputStreamReader(is);
+        in = new BufferedReader(isr);
+        while (true) {
+          String line = in.readLine();
+          if (line == null) return lf.toArray();
+          if (line.indexOf('&') == -1) lf.add(readObject(line));
+          // If there are any &'s then this must be iframe post
+          else {
+            StringTokenizer st = new StringTokenizer(line, "&");
+            while (st.hasMoreTokens())
+              lf.add(readObject(urlDecode(st.nextToken())));
+          }
+        }
+      } catch (Exception ex) {
+        throw new BrijjException("Failed to read input", ex);
+      } finally {
+        if (in != null) try {
+          in.close();
+        } catch (IOException ex) {}
+      }
+    }
+  }
+  private static boolean isMultipartContent(HttpServletRequest request) {
+    if (!"post".equals(request.getMethod().toLowerCase())) { return false; }
+    String contentType = request.getContentType();
+    if (contentType == null) { return false; }
+    if (contentType.toLowerCase().startsWith("multipart/")) { return true; }
+    return false;
+  }
+  private Method findMethod(Object[] ov, String scriptName, String methodName) throws ClassNotFoundException {
+    int inputArgCount = ov.length;
+    // Get a mutable list of all methods on the type specified by the creator
+    RemoteRequestProxy module = RemoteRequestProxy.getModule(scriptName, null, null);
+    List<Method> allMethods = new ArrayList<Method>();
+    for (Method m : module.getClass().getMethods()) { // only use methods with matching
+      // name
+      if (m.getName().equals(methodName)) allMethods.add(m);
+    }
+    if (allMethods.isEmpty()) {
+      // Not even a name match
+      throw new IllegalArgumentException("Method name not found: " + methodName);
+    }
+    // Remove all the methods where we can't convert the parameters
+    List<Method> am = new ArrayList<Method>();
+    allMethodsLoop: for (Method m : allMethods) {
+      Class<?>[] methodParamTypes = m.getParameterTypes();
+      if (inputArgCount == 0 && methodParamTypes.length == 0) {
+        am.add(m);
+        continue;
+      }
+      // Remove non-varargs methods which declare less params than were passed
+      if (!m.isVarArgs() && methodParamTypes.length < inputArgCount) continue allMethodsLoop;
+      if (m.isVarArgs()) {
+        int z = methodParamTypes.length - 1;
+        if (inputArgCount < z) continue allMethodsLoop;
+        int pc = ov.length;
+        Object[] va = new Object[pc - z];
+        for (int i = 0; i < pc; i++) {
+          va[i] = ov[z + i];
+        }
+        ov[z] = va;
+      } else if (methodParamTypes.length != inputArgCount) continue allMethodsLoop;
+      // Remove methods where we can't convert the input
+      for (int i = 0; i < methodParamTypes.length; i++) {
+        Class<?> methodParamType = methodParamTypes[i];
+        Object param = ov[i];
+        if (param != null && param.getClass() == FileTransfer.class) {
+          param = ((FileTransfer) param).asObject();
+          ov[i] = param;
+        }
+        if (inputArgCount <= i && methodParamType.isPrimitive()) continue allMethodsLoop;
+        boolean ok = false;
+        try {
+          Object zpar = Cast.cast(methodParamType, param);
+          ov[i] = zpar;
+          ok = true;
+        } catch (CastException cx) {
+          ok = false;
+        }
+        if (!ok) continue allMethodsLoop;
+      }
+      am.add(m);
+    }
+    if (am.isEmpty()) {
+      // Not even a name match
+      throw new IllegalArgumentException("Method not found. See logs for details");
+    } else if (am.size() == 1) { return am.get(0); }
+    throw new IllegalArgumentException("Multiple methods found -- the method mapping is ambiguous");
+  }
+  public void writeJavascript(HttpServletResponse response, Object obj) throws IOException {
+    if (obj instanceof Throwable) {
+      writeThrowable(response, (Throwable) obj);
+      return;
+    }
+    PrintWriter p = response.getWriter();
+    response.setContentType("text/html"); // "text/javascript; charset=\"utf=8\"");
+    p.write("c:");
+    Json.writeObject(obj, p);
+  }
+  private void writeThrowable(HttpServletResponse response, Throwable tt) throws IOException {
+    PrintWriter p = response.getWriter();
+    Throwable t = tt;
+    while (t instanceof InvocationTargetException)
+      t = ((InvocationTargetException) t).getTargetException();
+    response.setContentType("text/html"); // "text/javascript; charset=\"utf=8\"");
+    p.write("x:({javaClassName:\"");
+    p.write(t.getClass().getName());
+    p.write("\",message:\"");
+    p.write(Json.escapeJavaScript(t.getMessage()));
+    p.write("\"})");
+  }
+  private static Object readObject(Part z) {
+    try {
+      if (z.getContentType().startsWith("image/")) return ImageIO.read(z.getInputStream());
+      else if (z.getContentType().startsWith("text/")) return readAllTextFrom(new InputStreamReader(z.getInputStream(), "UTF-8"));
+      else return readAllBytesFrom(z.getInputStream());
+    } catch (IOException ex) {
+      return null;
+    }
+  }
+  private static Object readObject(String vv) {
+    char t = vv.charAt(0);
+    String v = vv.substring(2);
+    switch (t) {
+    case 'z':
+      return null;
+    case 's':
+      return urlDecode(v);
+    case 'n':
+      try {
+        return v.indexOf(".") != -1 ? Double.parseDouble(v) : Integer.parseInt(v);
+      } catch (NumberFormatException nfe) {}
+      try {
+        return Long.parseLong(v);
+      } catch (NumberFormatException nfe) {}
+      try {
+        return Double.parseDouble(v);
+      } catch (NumberFormatException nfe) {}
+      throw new RuntimeException("failed to parse numeric: " + v);
+    case 'b':
+      return Boolean.parseBoolean(v);
+    case 'a': {
+      v = v.substring(1, v.length() - 1);
+      LinkedList<Object> ll = new LinkedList<Object>();
+      StringTokenizer st = new StringTokenizer(v, ",");
+      while (st.hasMoreElements())
+        ll.add(readObject(urlDecode(st.nextToken())));
+      Cast ca = new Cast();
+      if (ll.get(0).getClass().equals(Integer.class)) return ca.castToArray(Integer.TYPE, ll);
+      else if (ll.get(0).getClass().equals(Double.class)) return ca.castToArray(Double.TYPE, ll);
+      else throw new RuntimeException("failed to parse array");
+    }
+    case 'o': {
+      HashMap<String, Object> hm = new HashMap<String, Object>();
+      StringTokenizer st = new StringTokenizer(v.substring(1, v.length() - 1), ",");
+      while (st.hasMoreElements()) {
+        String tkn = urlDecode(st.nextToken());
+        int n = tkn.indexOf(':');
+        hm.put(tkn.substring(0, n).trim(), readObject(tkn.substring(n + 1)));
+      }
+      return hm;
+    }
+    default:
+      throw new RuntimeException("unknown inbound parameter type: " + t);
+    }
+  }
+  static String urlDecode(String value) {
+    try {
+      return URLDecoder.decode(value, "UTF-8");
+    } catch (UnsupportedEncodingException ignore) {
+      return value;
+    }
+  }
+  static class BrijjException extends Exception {
+    private static final long serialVersionUID = -707126214405629313L;
+    public BrijjException(String message, Throwable ex) {
+      super(message, ex);
+    }
+    public BrijjException(Throwable ex) {
+      super(ex.getMessage(), ex);
+    }
+  }
+  public static String readAllTextFrom(URL url) throws IOException {
+    return readAllTextFrom(new InputStreamReader(url.openConnection().getInputStream(), "UTF-8"));
+  }
+  public static String readAllTextFrom(Reader r) throws IOException {
+    StringBuilder t = new StringBuilder();
+    char[] buffer = new char[4096];
+    while (true) {
+      int n = r.read(buffer);
+      if (n <= 0) break;
+      t.append(buffer, 0, n);
+    }
+    return t.toString();
+  }
+  public static byte[] readAllBytesFrom(InputStream i) throws IOException {
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    byte[] buffer = new byte[4096];
+    while (true) {
+      int n = i.read(buffer);
+      if (n <= 0) break;
+      bos.write(buffer, 0, n);
+    }
+    return bos.toByteArray();
+  }
+  public static void pipe(InputStream is, OutputStream os) throws IOException {
+    byte[] buffer = new byte[4096];
+    while (true) {
+      int n = is.read(buffer);
+      if (n <= 0) break;
+      os.write(buffer, 0, n);
+    }
+    os.flush();
+  }
 }

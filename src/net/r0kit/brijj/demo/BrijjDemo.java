@@ -1,6 +1,10 @@
 package net.r0kit.brijj.demo;
 
 import java.io.IOException;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.r0kit.brijj.BrijjServlet;
@@ -16,7 +20,7 @@ public class BrijjDemo {
     Server server = new Server(Integer.parseInt(argsx[0]));
     ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
     context.setContextPath("/brijj");
-    RemoteRequestProxy.register(Demo.class, UploadDownload.class, People.class, TestTypes.class);
+    RemoteRequestProxy.register(Demo.class, UploadDownload.class, TestTypes.class);
 
     context.addServlet(BrijjServlet.class, "/*");
 
@@ -42,6 +46,23 @@ public class BrijjDemo {
     }
     public String[] getInsert() {
       return new String[] { "<p><strong style=color:red;>BriJJ is bridging!</strong></p>", "1.3.1" };
+    }
+    public String getValue(String k) {
+      return System.getProperty(k);
+    }
+    public Set<Object> getKeys() {
+      return System.getProperties().keySet();
+    }
+    public Map<String,String> getMap(String s) {
+      HashMap<String, String> res = new HashMap<String, String>();
+      Set<Object> so = System.getProperties().keySet();
+      for(Object k : so) {
+        String kk = (String)k;
+        if ( kk.toLowerCase().contains(s.toLowerCase())) {
+          res.put(kk, (String)System.getProperty(kk));
+        }
+      }
+      return res;
     }
     @Documentation(text="This just prefixes a constant string to the supplied value")
     public String getError(@Eg(value="bogus") String s) throws IOException {

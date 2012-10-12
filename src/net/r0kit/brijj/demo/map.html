@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simple Map Retrieval Demo</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=us-ascii" />
+  <script type='text/javascript' src='../brijj.js'> </script>
+  <script type="text/javascript">
+  function retrieveKeys() {
+    var key = document.getElementById("demoKey").value;
+    Demo.getKeys(putList);
+  }
+  function retrieveValue() {
+    var key = document.getElementById("demoKey").value;
+    Demo.getValue(key, putValue);
+  }
+  function retrieveMap() {
+    var key = document.getElementById("demoKey").value;
+    Demo.getMap(key, putMap);
+  }
+  function putValue(data) {
+      document.getElementById("demoReply").innerHTML = data;
+  }
+  function putList(data) {
+    var z = document.getElementById("demoReply");
+    z.innerHTML="<ul></ul>";
+    z = z.children[0];
+    for(var i=0;i<data.length;i++) {
+      var k = document.createElement("li");
+      k.innerHTML=data[i];
+      z.appendChild(k);
+    }
+  }
+  function putMap(data) {
+    var z = document.getElementById("demoReply");
+    z.innerHTML="<dl></dl>";
+    z = z.children[0];
+    for(var h in data) {
+      var dt = document.createElement("dt");
+      dt.innerHTML=h;
+      z.appendChild(dt);
+      var dd = document.createElement("dd");
+      dd.innerHTML=data[h];
+      z.appendChild(dd);
+    }
+  }
+</script>
+</head>
+
+<body>
+<div>[ <a href="index.html">Demo home page</a> ] </div>
+
+<h1>Simple Map Retrieval Demo</h1>
+
+<p>This is a demonstration of retrieving an associative map from the server.</p>
+
+  <div id="demoDiv">
+      Name:
+      <input type="text" id="demoKey" value="Joe"/>
+      <input type="button" id="demoSend" value="Get List of Keys" onclick="retrieveKeys()"/>
+      <input type="button" id="demoSend" value="Get Value" onclick="retrieveValue()"/>
+      <input type="button" id="demoSend" value="Get Map of Matching Keys" onclick="retrieveMap()"/>
+            
+      <div style="padding: 4px 0 0 0;">
+      Reply: <span id="demoReply" style="padding: 0 4px 0 4px;"></span>
+      </div>
+  </div>
+</body>
+</html>

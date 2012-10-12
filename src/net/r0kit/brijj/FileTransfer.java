@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 
@@ -46,18 +45,16 @@ public class FileTransfer {
     int z = hashCode();
     timeSaved = System.currentTimeMillis();
     instances.put(z, this);
-    return "'" +  ( req == null ? "" : (req.getContextPath() + req.getServletPath() + "/")) +"download/" + z + "'";
+    return "'" + (req == null ? "" : (req.getContextPath() + req.getServletPath() + "/")) + "download/" + z + "'";
   }
   public InputStream getInputStream() {
     if (inputStream != null) return inputStream;
     else return null;
   }
-
   public final String filename;
   public final String mimeType;
   public long size;
   public InputStream inputStream;
-
   public static FileTransfer get(int z) {
     FileTransfer t = instances.get(z);
     if (t != null) instances.remove(z);
@@ -93,7 +90,6 @@ public class FileTransfer {
     else if (mimeType.startsWith("image/")) return asImage();
     else return this;
   }
-
   public boolean inline = true;
   public long timeSaved;
   private HttpServletRequest req;
