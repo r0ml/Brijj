@@ -351,6 +351,8 @@ import net.r0kit.brijj.RemoteRequestProxy.Eg;
         for (int i = 0; i < pc; i++) {
           va[i] = ov[z + i];
         }
+        // BUG: ov needs to be shortened to length z+1
+        // This modified "ov" however, is associated with this method -- and the previos ov is associated with its method
         ov[z] = va;
       } else if (methodParamTypes.length != inputArgCount) continue allMethodsLoop;
       // Remove methods where we can't convert the input
