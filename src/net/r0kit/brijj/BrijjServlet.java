@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.StringTokenizer;
 import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
@@ -45,7 +46,44 @@ import net.r0kit.brijj.RemoteRequestProxy.Eg;
     else if (pathInfo.equals("/brijj.js")) doEngine(req, resp);
     else if (pathInfo.startsWith("/test/")) doTest(req, resp, pathInfo.substring("/test/".length()).replaceAll("\\.js$", ""));
     else if (pathInfo.startsWith("/download/")) doDownload(req, resp, Integer.parseInt(pathInfo.substring("/download/".length())));
+    else if (pathInfo.startsWith("/call/")) doTheGet(req, resp, pathInfo.substring("/call/".length()));
     else doPost(req, resp);
+  }
+  public void doTheGet(HttpServletRequest req, HttpServletResponse resp,String mth) throws IOException {
+    Map<String,String[]> mm = req.getParameterMap();
+    Map<String,String> mx = new HashMap<String,String>();
+    for( Entry<String,String[]> kv : mm.entrySet()) {
+      mx.put(kv.getKey(), kv.getValue()[0]);
+    }
+    
+    Object rsp;
+    // handle
+      try {
+        String[] smns = mth.split("\\.");
+        String clazz = smns[0];
+        Object[] ov = new Object[]{mx};
+        Method method = findMethod(ov, clazz, smns[1]);
+        if (method == null) { throw new IllegalArgumentException("Missing method or missing parameter converters"); }
+        // Convert all the parameters to the correct types
+        int destParamCount = method.getParameterTypes().length;
+        Object[] arguments = new Object[destParamCount];
+        for (int j = 0; j < destParamCount; j++) {
+          Object param = ov[j];
+          Type paramType = method.getGenericParameterTypes()[j];
+          arguments[j] = Cast.cast(paramType, param);
+        }
+        RemoteRequestProxy object = RemoteRequestProxy.getModule(clazz, req, resp);
+        Object res = method.invoke(object, arguments);
+        rsp = res;
+      } catch (Throwable ex) {
+        rsp = ex;
+      }
+      if (rsp instanceof BufferedImage) rsp = new FileTransfer((BufferedImage) rsp, "png");
+      writeHTML(resp, rsp);
+  }
+  
+  public void writeHTML(HttpServletResponse resp, Object rsp) throws IOException {
+    resp.getWriter().write(rsp.toString());
   }
   public void doDownload(HttpServletRequest req, HttpServletResponse resp, int hc) throws IOException {
     FileTransfer ft = FileTransfer.get(hc);
