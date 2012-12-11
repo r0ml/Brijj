@@ -1,0 +1,7 @@
+
+If I accidentally pass a DOM node as a parameter to a brijj remote function, I get into a bottomless recursion trying to serialize it.
+
+The handling for variadic functions on the server rewrites the argument array -- which breaks the calls to the non-variadic matches.
+
+The "register" function exists as a static method -- which causes problems when defining a "register" function (see the variadic problem above).
+
