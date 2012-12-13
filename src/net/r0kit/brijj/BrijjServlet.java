@@ -83,7 +83,12 @@ import net.r0kit.brijj.RemoteRequestProxy.Eg;
   }
   
   public void writeHTML(HttpServletResponse resp, Object rsp) throws IOException {
-    resp.getWriter().write(rsp.toString());
+    if (rsp instanceof String) {
+      resp.setContentType("text/html");
+      resp.getWriter().write( (String)rsp);
+      return;
+    }
+    resp.getWriter().write( rsp.toString());
   }
   public void doDownload(HttpServletRequest req, HttpServletResponse resp, int hc) throws IOException {
     FileTransfer ft = FileTransfer.get(hc);
