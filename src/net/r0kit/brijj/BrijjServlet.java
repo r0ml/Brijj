@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -46,10 +47,17 @@ import net.r0kit.brijj.RemoteRequestProxy.Eg;
     else if (pathInfo.equals("/brijj.js")) doEngine(req, resp);
     else if (pathInfo.startsWith("/test/")) doTest(req, resp, pathInfo.substring("/test/".length()).replaceAll("\\.js$", ""));
     else if (pathInfo.startsWith("/download/")) doDownload(req, resp, Integer.parseInt(pathInfo.substring("/download/".length())));
-    else if (pathInfo.startsWith("/call/")) doTheGet(req, resp, pathInfo.substring("/call/".length()));
+    else if (pathInfo.startsWith("/call/")) {
+      String[] pi = pathInfo.split("/");
+      String[] pix = new String[pi.length-3];
+      System.arraycopy(pi, 3, pix, 0, pix.length);
+      doTheGet(req, resp, pi[2], pix);
+    }
     else doPost(req, resp);
   }
-  public void doTheGet(HttpServletRequest req, HttpServletResponse resp,String mth) throws IOException {
+  
+  // TODO: set headers to prevent caching of this URL so that the call will be re-issued instead of read from cache
+  public void doTheGet(HttpServletRequest req, HttpServletResponse resp,String mth, String[] pix) throws IOException {
     Map<String,String[]> mm = req.getParameterMap();
     Map<String,String> mx = new HashMap<String,String>();
     for( Entry<String,String[]> kv : mm.entrySet()) {
@@ -61,7 +69,7 @@ import net.r0kit.brijj.RemoteRequestProxy.Eg;
       try {
         String[] smns = mth.split("\\.");
         String clazz = smns[0];
-        Object[] ov = new Object[]{mx};
+        Object[] ov = new Object[]{pix, mx};
         Method method = findMethod(ov, clazz, smns[1]);
         if (method == null) { throw new IllegalArgumentException("Missing method or missing parameter converters"); }
         // Convert all the parameters to the correct types
@@ -75,6 +83,8 @@ import net.r0kit.brijj.RemoteRequestProxy.Eg;
         RemoteRequestProxy object = RemoteRequestProxy.getModule(clazz, req, resp);
         Object res = method.invoke(object, arguments);
         rsp = res;
+      } catch (InvocationTargetException itx) {
+        rsp = itx.getTargetException();
       } catch (Throwable ex) {
         rsp = ex;
       }
