@@ -12,16 +12,13 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -226,19 +223,13 @@ import net.r0kit.brijj.RemoteRequestProxy.Eg;
     } catch (ClassNotFoundException ignore) {
       return ignore.toString();
     }
-    Method[] methods = module.getClass().getMethods();
-    Arrays.sort(methods, new Comparator<Method>() {
-      public int compare(Method a, Method b) {
-        return a.getName().compareTo(b.getName());
-      }
-    });
     scriptName = module.getClass().getSimpleName();
     String pg = readAllTextFrom(getClass().getResource("test.html"));
     pg = rp(pg, "base", root);
     pg = rp(pg, "moduleName", module.toString());
     StringBuffer sb = new StringBuffer();
-    for (int i = 0; i < methods.length; i++) {
-      Method method = methods[i];
+    int ii=0;
+    for (Method method : module.getMethodList()) {
       String methodName = method.getName();
       // Is it on the list of unusable names
       if (Json.isReserved(methodName)) {
@@ -264,6 +255,7 @@ import net.r0kit.brijj.RemoteRequestProxy.Eg;
         }
       }
       Class<?>[] paramTypes = method.getParameterTypes();
+      String iii = Integer.toString(ii);
       for (int j = 0; j < paramTypes.length; j++) {
         Class<?> paramType = paramTypes[j];
         // The special type that we handle transparently
@@ -279,21 +271,22 @@ import net.r0kit.brijj.RemoteRequestProxy.Eg;
         }
         int sz = 20;
         if (value.length() > sz) sz = value.length() + 5;
-        String input = "    <input class='itext' type='text' size='" + sz + "' value='" + value + "' id='p" + i + "_" + j
+        String input = "    <input class='itext' type='text' size='" + sz + "' value='" + value + "' id='p" + iii + "_" + j
             + "' title='Will be converted to: " + paramType.getName() + "'/>";
         if (paramType == BufferedImage.class || paramType == FileTransfer.class) {
-          input = "    <input class='itext' type='file' id='p" + i + "_" + j + "'/>";
+          input = "    <input class='itext' type='file' id='p" + iii + "_" + j + "'/>";
         }
         sb.append(input);
         sb.append(j == paramTypes.length - 1 ? "" : ", \n");
       }
       sb.append("  );\n");
       sb.append("<input class='ibutton' type='button' onclick='");
-      sb.append("doClick(\"").append(scriptName).append("\",\"").append(methodName).append("\",").append(Integer.toString(i))
+      sb.append("doClick(\"").append(scriptName).append("\",\"").append(methodName).append("\",").append(iii)
           .append(",").append(Integer.toString(paramTypes.length)).append(")'");
       sb.append(" value='Execute' title='Calls ").append(scriptName).append(".").append(methodName)
-          .append("().' /><div class=\"output\" id='d").append(Integer.toString(i)).append("' class='reply'></div>")
+          .append("().' /><div class=\"output\" id='d").append(iii).append("' class='reply'></div>")
           .append("</li>\n");
+      ii++;
     }
     pg = rp(pg, "methods", sb.toString());
     return pg;
@@ -378,8 +371,7 @@ import net.r0kit.brijj.RemoteRequestProxy.Eg;
     // Get a mutable list of all methods on the type specified by the creator
     RemoteRequestProxy module = RemoteRequestProxy.getModule(scriptName, null, null);
     List<Method> allMethods = new ArrayList<Method>();
-    for (Method m : module.getClass().getMethods()) { // only use methods with matching
-      // name
+    for (Method m : module.getMethodList()) { // only use methods with matching
       if (m.getName().equals(methodName)) allMethods.add(m);
     }
     if (allMethods.isEmpty()) {
@@ -459,8 +451,10 @@ import net.r0kit.brijj.RemoteRequestProxy.Eg;
   }
   private static Object readObject(Part z) {
     try {
-      if (z.getContentType().startsWith("image/")) return ImageIO.read(z.getInputStream());
-      else if (z.getContentType().startsWith("text/")) return readAllTextFrom(new InputStreamReader(z.getInputStream(), "UTF-8"));
+      String ct = z.getContentType();
+      if (ct == null) return readObject(readAllTextFrom(new InputStreamReader(z.getInputStream(),"UTF-8")));
+      else if (ct.startsWith("image/")) return ImageIO.read(z.getInputStream());
+      else if (ct.startsWith("text/")) return readAllTextFrom(new InputStreamReader(z.getInputStream(), "UTF-8"));
       else return readAllBytesFrom(z.getInputStream());
     } catch (IOException ex) {
       return null;

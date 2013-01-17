@@ -1,40 +1,47 @@
 package net.r0kit.brijj.demo;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.r0kit.brijj.BrijjServlet;
 import net.r0kit.brijj.RemoteRequestProxy;
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.servlet.DefaultServlet;
-import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.apache.catalina.Context;
+import org.apache.catalina.LifecycleException;
+import org.apache.catalina.Wrapper;
+import org.apache.catalina.servlets.DefaultServlet;
+import org.apache.catalina.startup.Tomcat;
 
 public class BrijjDemo {
-  public static void main(String[] argsx) throws Exception {
-    Server server = new Server(Integer.parseInt(argsx[0]));
-    ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-    context.setContextPath("/brijj");
-    RemoteRequestProxy.register(Demo.class, UploadDownload.class, TestTypes.class);
+  
+  public static void main(String[] args) 
+      throws IOException, ServletException, LifecycleException, InterruptedException {
 
-    context.addServlet(BrijjServlet.class, "/*");
+      final Tomcat tomcat = new Tomcat();
+      tomcat.setPort(8260);
+             
+      RemoteRequestProxy.register(Demo.class, UploadDownload.class, TestTypes.class);
+      
+      Context c2 = tomcat.addContext("/demo", BrijjDemo.class.getResource(".").getFile());
+      Wrapper w2 = Tomcat.addServlet(c2,"default", new DefaultServlet());
+      c2.addServletMapping("/*", "default");
+      w2.addInitParameter("listings", "true");
 
-    // the bug in eclipse is fixed as follows:
-    System.setProperty(System.getProperty("java.io.tmpdir"),System.getProperty("java.io.tmpdir"));
-    
-    context.addServlet(DefaultServlet.class, "/demo/*");
-    context.setResourceBase(BrijjDemo.class.getResource("/net/r0kit/brijj").toExternalForm());
-    ContextHandlerCollection contexts = new ContextHandlerCollection();
-    contexts.setHandlers(new Handler[] { context });
-    server.setHandler(contexts);
-    server.start();
-    server.join();
+      Context ctx = tomcat.addContext("/", new File("..").getAbsolutePath());
+      Wrapper w = Tomcat.addServlet(ctx, "brijj", new BrijjServlet());
+      ctx.setAllowCasualMultipartParsing(true);
+      ctx.addServletMapping("/*", "brijj");
+
+      tomcat.enableNaming();
+      tomcat.start();
+      tomcat.getServer().await();
   }
+  
+
   public static class Demo extends RemoteRequestProxy {
     public Demo(HttpServletRequest r, HttpServletResponse s) {
       super(r, s);
@@ -52,6 +59,15 @@ public class BrijjDemo {
     }
     public Set<Object> getKeys() {
       return System.getProperties().keySet();
+    }
+    private String hidden() {
+      return "This should not appear in the list of available methods";
+    }
+    protected String alsoHidden() {
+      return "This should also not appear in the list of available methods";
+    }
+    public static String likewiseHidden() {
+      return "Static methods like this one should not appear in the list of available methods";
     }
     public Map<String,String> getMap(String s) {
       HashMap<String, String> res = new HashMap<String, String>();
@@ -104,7 +120,7 @@ public class BrijjDemo {
         res += a[i] * b[i];
       return res;
     }
-    public double productReals(double... ds) {
+    public double productReals(double[] ds) {
       double res = 1;
       for (double c : ds)
         res *= c;

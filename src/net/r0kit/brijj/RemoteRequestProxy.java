@@ -7,9 +7,12 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -26,6 +29,8 @@ public abstract class RemoteRequestProxy {
   protected HttpSession sess;
   protected ServletContext context;
   protected static Map<String, Class<? extends RemoteRequestProxy>> proxies = new HashMap<String, Class<? extends RemoteRequestProxy>>();
+  protected List<Method> methodList;
+  
   /** registers classes to be exposed to Brijj. If we could introspect and get a list of my subclasses, I wouldn't need to register
    * those subclasses */
   public static void register(Class<? extends RemoteRequestProxy>... cls) {
@@ -35,6 +40,26 @@ public abstract class RemoteRequestProxy {
       else throw new RuntimeException("cannot register " + cl);
     }
   }
+  public List<Method> getMethodList() {
+    if (methodList == null) {
+      methodList = new LinkedList<Method>();
+      Method[] methods = getClass().getDeclaredMethods();
+      Arrays.sort(methods, new Comparator<Method>() {
+        public int compare(Method a, Method b) {
+          return a.getName().compareTo(b.getName());
+        }
+      });
+      for (int i = 0; i < methods.length; i++) {
+        Method method = methods[i];
+        int mm = method.getModifiers();
+        if (!Modifier.isPublic(mm)) continue;
+        if (Modifier.isStatic(mm)) continue;
+        methodList.add(method);
+      }
+    }
+    return methodList;
+  }
+  
   /** The constructor for a request proxy */
   public RemoteRequestProxy(HttpServletRequest r, HttpServletResponse s) {
     locale = new Locale("en");
@@ -96,13 +121,7 @@ public abstract class RemoteRequestProxy {
     // defines the java classes in the global context
     buffer.append("\n(function() {  var _ = window; if (_." + scriptName + " == undefined) {\n    var p;");
     buffer.append("p = {}; p._path = '" + csp + "';\n");
-    Method[] methods = module.getClass().getMethods();
-    Arrays.sort(methods, new Comparator<Method>() {
-      public int compare(Method a, Method b) {
-        return a.getName().compareTo(b.getName());
-      }
-    });
-    for (Method method : methods) {
+    for (Method method : module.getMethodList()) {
       String methodName = method.getName();
       // Is it on the list of banned names
       if (Json.isReserved(methodName)) continue;

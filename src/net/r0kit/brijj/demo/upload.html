@@ -11,7 +11,9 @@
     var color = document.querySelector('[name=color]').value;
 
     UploadDownload.uploadFiles(image, text, color, function(data) {
-      document.getElementById('image').src = data;
+      var im = document.getElementById("image_div");
+      im.innerHTML="";
+      im.appendChild(data);
     });
   }
 </script>
@@ -54,7 +56,7 @@
   	</table>
 
     <br/>    
-    <img id="image" src="javascript:void(0);"/>
+    <div id="image_div"></div>
 
   </div>
 </body>
