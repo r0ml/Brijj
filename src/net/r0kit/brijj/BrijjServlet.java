@@ -470,7 +470,8 @@ import net.r0kit.brijj.RemoteRequestProxy.Eg;
       return urlDecode(v);
     case 'n':
       try {
-        return v.indexOf(".") != -1 ? Double.parseDouble(v) : Integer.parseInt(v);
+        if (v.indexOf(".") != -1) return Double.parseDouble(v);
+        else return Integer.parseInt(v);
       } catch (NumberFormatException nfe) {}
       try {
         return Long.parseLong(v);
