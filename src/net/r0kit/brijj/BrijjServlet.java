@@ -391,8 +391,8 @@ import net.r0kit.brijj.RemoteRequestProxy.Eg;
       if (m.isVarArgs()) {
         int z = methodParamTypes.length - 1;
         if (inputArgCount < z) continue allMethodsLoop;
-        int pc = ov.length;
-        Object[] va = new Object[pc - z];
+        int pc = ov.length - z;
+        Object[] va = new Object[pc];
         for (int i = 0; i < pc; i++) {
           va[i] = ov[z + i];
         }
