@@ -30,6 +30,7 @@ public abstract class RemoteRequestProxy {
   protected ServletContext context;
   protected static Map<String, Class<? extends RemoteRequestProxy>> proxies = new HashMap<String, Class<? extends RemoteRequestProxy>>();
   protected List<Method> methodList;
+  public static String loginAttribute = "userId";
   
   /** registers classes to be exposed to Brijj. If we could introspect and get a list of my subclasses, I wouldn't need to register
    * those subclasses */
@@ -161,5 +162,8 @@ public abstract class RemoteRequestProxy {
   }
   @Target(ElementType.PARAMETER) @Retention(RetentionPolicy.RUNTIME) public @interface Eg {
     String value() default "";
+  }
+  
+  @Target(ElementType.METHOD) @Retention(RetentionPolicy.RUNTIME) public @interface PreLogin {
   }
 }

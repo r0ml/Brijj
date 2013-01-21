@@ -35,6 +35,7 @@ import javax.servlet.http.Part;
 import net.r0kit.brijj.Cast.CastException;
 import net.r0kit.brijj.RemoteRequestProxy.Documentation;
 import net.r0kit.brijj.RemoteRequestProxy.Eg;
+import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
 
 @MultipartConfig public class BrijjServlet extends HttpServlet {
   private static final long serialVersionUID = -8458639444465608967L;
@@ -52,7 +53,42 @@ import net.r0kit.brijj.RemoteRequestProxy.Eg;
     }
     else doPost(req, resp);
   }
-  
+  public static class NotLoggedIn extends RuntimeException {
+    @Override public String toString() { return "Not Logged In"; }
+    @Override public String getMessage() { return "Not Logged In"; }
+  }
+  public Object invoker(String mth, Object[] ov, HttpServletRequest req, HttpServletResponse resp) {
+    Object rsp;
+    try {
+      String[] smns = mth.split("\\.");
+      String clazz = smns[0];
+      Object[] rna = findMethod(ov, clazz, smns[1]);
+      Method method = (Method)rna[0];
+      ov = (Object[]) rna[1];
+      if (method == null) { throw new IllegalArgumentException("Missing method or missing parameter converters"); }
+      
+      if (method.isAnnotationPresent(PreLogin.class) || req.getSession().getAttribute(RemoteRequestProxy.loginAttribute) != null);
+      else return new NotLoggedIn();
+      
+      // Convert all the parameters to the correct types
+      int destParamCount = method.getParameterTypes().length;
+      Object[] arguments = new Object[destParamCount];
+      for (int j = 0; j < destParamCount; j++) {
+        Object param = ov[j];
+        Type paramType = method.getGenericParameterTypes()[j];
+        arguments[j] = Cast.cast(paramType, param);
+      }
+      RemoteRequestProxy object = RemoteRequestProxy.getModule(clazz, req, resp);
+      Object res = method.invoke(object, arguments);
+      rsp = res;
+    } catch (InvocationTargetException itx) {
+      rsp = itx.getTargetException();
+    } catch (Throwable ex) {
+      rsp = ex;
+    }
+    if (rsp instanceof BufferedImage) rsp = new FileTransfer((BufferedImage) rsp, "png");
+    return rsp;
+  }
   // TODO: set headers to prevent caching of this URL so that the call will be re-issued instead of read from cache
   public void doTheGet(HttpServletRequest req, HttpServletResponse resp,String mth, String[] pix) throws IOException {
     Map<String,String[]> mm = req.getParameterMap();
@@ -61,32 +97,10 @@ import net.r0kit.brijj.RemoteRequestProxy.Eg;
       mx.put(kv.getKey(), kv.getValue()[0]);
     }
     
-    Object rsp;
+    Object rsp = invoker(mth, new Object[] {pix, mx}, req, resp);
     // handle
-      try {
-        String[] smns = mth.split("\\.");
-        String clazz = smns[0];
-        Object[] ov = new Object[]{pix, mx};
-        Method method = findMethod(ov, clazz, smns[1]);
-        if (method == null) { throw new IllegalArgumentException("Missing method or missing parameter converters"); }
-        // Convert all the parameters to the correct types
-        int destParamCount = method.getParameterTypes().length;
-        Object[] arguments = new Object[destParamCount];
-        for (int j = 0; j < destParamCount; j++) {
-          Object param = ov[j];
-          Type paramType = method.getGenericParameterTypes()[j];
-          arguments[j] = Cast.cast(paramType, param);
-        }
-        RemoteRequestProxy object = RemoteRequestProxy.getModule(clazz, req, resp);
-        Object res = method.invoke(object, arguments);
-        rsp = res;
-      } catch (InvocationTargetException itx) {
-        rsp = itx.getTargetException();
-      } catch (Throwable ex) {
-        rsp = ex;
-      }
-      if (rsp instanceof BufferedImage) rsp = new FileTransfer((BufferedImage) rsp, "png");
-      writeHTML(resp, rsp);
+    
+    writeHTML(resp, rsp);
   }
   
   public void writeHTML(HttpServletResponse resp, Object rsp) throws IOException {
@@ -293,30 +307,10 @@ import net.r0kit.brijj.RemoteRequestProxy.Eg;
   }
   public void handle(HttpServletRequest request, HttpServletResponse response) throws BrijjException, IOException {
     Object[] ov = parsePost(request);
-    Object rsp = new Throwable("rsp not initialized");
-    try {
-      String smn = request.getPathInfo().substring("/call/".length());
-      String[] smns = smn.split("\\.");
-      String clazz = smns[0];
-      Method method = findMethod(ov, clazz, smns[1]);
-      if (method == null) { throw new IllegalArgumentException("Missing method or missing parameter converters"); }
-      // Convert all the parameters to the correct types
-      int destParamCount = method.getParameterTypes().length;
-      Object[] arguments = new Object[destParamCount];
-      for (int j = 0; j < destParamCount; j++) {
-        Object param = ov[j];
-        Type paramType = method.getGenericParameterTypes()[j];
-        arguments[j] = Cast.cast(paramType, param);
-      }
-      RemoteRequestProxy object = RemoteRequestProxy.getModule(clazz, request, response);
-      Object res = method.invoke(object, arguments);
-      rsp = res;
-    } catch (Throwable ex) {
-      rsp = ex;
-    }
-    if (rsp instanceof BufferedImage) rsp = new FileTransfer((BufferedImage) rsp, "png");
+    Object rsp = invoker( request.getPathInfo().substring("/call/".length()), ov, request, response);
     writeJavascript(response, rsp);
   }
+  
   private Object[] parsePost(HttpServletRequest req) throws BrijjException {
     List<Object> lf = new LinkedList<Object>();
     if (isMultipartContent(req)) {
@@ -366,11 +360,13 @@ import net.r0kit.brijj.RemoteRequestProxy.Eg;
     if (contentType.toLowerCase().startsWith("multipart/")) { return true; }
     return false;
   }
-  private Method findMethod(Object[] ov, String scriptName, String methodName) throws ClassNotFoundException {
+  private Object[] findMethod(Object[] ov, String scriptName, String methodName) throws ClassNotFoundException {
     int inputArgCount = ov.length;
     // Get a mutable list of all methods on the type specified by the creator
     RemoteRequestProxy module = RemoteRequestProxy.getModule(scriptName, null, null);
     List<Method> allMethods = new ArrayList<Method>();
+    List<Object[]> ovl = new ArrayList<Object[]>();
+    
     for (Method m : module.getMethodList()) { // only use methods with matching
       if (m.getName().equals(methodName)) allMethods.add(m);
     }
@@ -380,10 +376,12 @@ import net.r0kit.brijj.RemoteRequestProxy.Eg;
     }
     // Remove all the methods where we can't convert the parameters
     List<Method> am = new ArrayList<Method>();
+    Object[] nov = new Object[ov.length];
     allMethodsLoop: for (Method m : allMethods) {
       Class<?>[] methodParamTypes = m.getParameterTypes();
       if (inputArgCount == 0 && methodParamTypes.length == 0) {
         am.add(m);
+        ovl.add(nov);
         continue;
       }
       // Remove non-varargs methods which declare less params than were passed
@@ -391,28 +389,35 @@ import net.r0kit.brijj.RemoteRequestProxy.Eg;
       if (m.isVarArgs()) {
         int z = methodParamTypes.length - 1;
         if (inputArgCount < z) continue allMethodsLoop;
+        nov = new Object[z+1];
         int pc = ov.length - z;
         Object[] va = new Object[pc];
+        for(int i=0;i<z;i++) {
+          nov[i]=ov[i];
+        }
         for (int i = 0; i < pc; i++) {
           va[i] = ov[z + i];
         }
         // BUG: ov needs to be shortened to length z+1
         // This modified "ov" however, is associated with this method -- and the previos ov is associated with its method
-        ov[z] = va;
-      } else if (methodParamTypes.length != inputArgCount) continue allMethodsLoop;
+        nov[z] = va;
+      } else {
+        if (methodParamTypes.length != inputArgCount) continue allMethodsLoop;
+        for(int i=0;i<ov.length;i++) nov[i]=ov[i];
+      }
       // Remove methods where we can't convert the input
       for (int i = 0; i < methodParamTypes.length; i++) {
         Class<?> methodParamType = methodParamTypes[i];
-        Object param = ov[i];
+        Object param = nov[i];
         if (param != null && param.getClass() == FileTransfer.class) {
           param = ((FileTransfer) param).asObject();
-          ov[i] = param;
+          nov[i] = param;
         }
         if (inputArgCount <= i && methodParamType.isPrimitive()) continue allMethodsLoop;
         boolean ok = false;
         try {
           Object zpar = Cast.cast(methodParamType, param);
-          ov[i] = zpar;
+          nov[i] = zpar;
           ok = true;
         } catch (CastException cx) {
           ok = false;
@@ -420,11 +425,12 @@ import net.r0kit.brijj.RemoteRequestProxy.Eg;
         if (!ok) continue allMethodsLoop;
       }
       am.add(m);
+      ovl.add(nov);
     }
     if (am.isEmpty()) {
       // Not even a name match
       throw new IllegalArgumentException("Method not found. See logs for details");
-    } else if (am.size() == 1) { return am.get(0); }
+    } else if (am.size() == 1) { return new Object[]{ am.get(0), ovl.get(0) }; }
     throw new IllegalArgumentException("Multiple methods found -- the method mapping is ambiguous");
   }
   public void writeJavascript(HttpServletResponse response, Object obj) throws IOException {
