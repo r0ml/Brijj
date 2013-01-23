@@ -493,7 +493,7 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
       LinkedList<Object> ll = new LinkedList<Object>();
       StringTokenizer st = new StringTokenizer(v, ",");
       while (st.hasMoreElements())
-        ll.add(readObject(urlDecode(st.nextToken())));
+        ll.add(readObject(/* urlDecode( */ st.nextToken() /*)*/ ));
       Cast ca = new Cast();
       if (ll.get(0).getClass().equals(Integer.class)) return ca.castToArray(Integer.TYPE, ll);
       else if (ll.get(0).getClass().equals(Double.class)) return ca.castToArray(Double.TYPE, ll);
@@ -503,7 +503,7 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
       HashMap<String, Object> hm = new HashMap<String, Object>();
       StringTokenizer st = new StringTokenizer(v.substring(1, v.length() - 1), ",");
       while (st.hasMoreElements()) {
-        String tkn = urlDecode(st.nextToken());
+        String tkn = st.nextToken(); // urlDecode(st.nextToken());
         int n = tkn.indexOf(':');
         hm.put(tkn.substring(0, n).trim(), readObject(tkn.substring(n + 1)));
       }
