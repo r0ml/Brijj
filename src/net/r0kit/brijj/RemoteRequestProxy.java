@@ -110,6 +110,9 @@ public abstract class RemoteRequestProxy {
   @Override public String toString() {
     return this.getClass().getSimpleName() + "( ... )";
   }
+  public String getUserId() {
+    return (String)this.sess.getAttribute(RemoteRequestProxy.loginAttribute); 
+  }
   public String generateInterfaceScript(String csp, String scriptName) {
     RemoteRequestProxy module;
     try {
