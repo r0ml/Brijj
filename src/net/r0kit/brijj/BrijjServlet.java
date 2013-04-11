@@ -19,6 +19,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -508,6 +509,9 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
         hm.put(tkn.substring(0, n).trim(), readObject(tkn.substring(n + 1)));
       }
       return hm;
+    }
+    case 'd': {
+        return new Date( Long.parseLong(v));
     }
     default:
       throw new RuntimeException("unknown inbound parameter type: " + t);
