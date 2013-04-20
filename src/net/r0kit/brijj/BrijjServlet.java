@@ -317,10 +317,15 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
     if (isMultipartContent(req)) {
       try {
         Collection<Part> p = req.getParts();
-        for (int i = 0; i < p.size(); i++)
+        /*for (int i = 0; i < p.size(); i++)
           lf.add(null);
-        for (Part z : p)
-          lf.set(Integer.valueOf(z.getName().substring(1)), readObject(z));
+          */
+        for (Part z : p) {
+          String n = z.getName();
+          Object o = readObject(z);
+          // lf.set(Integer.valueOf(z.getName().substring(1)), readObject(z));
+          lf.add(o);
+        }
         return lf.toArray();
       } catch (ServletException sx) {
         throw new BrijjException(sx);
@@ -377,7 +382,7 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
     }
     // Remove all the methods where we can't convert the parameters
     List<Method> am = new ArrayList<Method>();
-    Object[] nov = new Object[ov.length];
+    Object[] nov = null;
     allMethodsLoop: for (Method m : allMethods) {
       Class<?>[] methodParamTypes = m.getParameterTypes();
       if (inputArgCount == 0 && methodParamTypes.length == 0) {
@@ -404,6 +409,7 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
         nov[z] = va;
       } else {
         if (methodParamTypes.length != inputArgCount) continue allMethodsLoop;
+        nov = new Object[ov.length];
         for(int i=0;i<ov.length;i++) nov[i]=ov[i];
       }
       // Remove methods where we can't convert the input
@@ -432,7 +438,8 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
       // Not even a name match
       throw new IllegalArgumentException("Method not found. See logs for details");
     } else if (am.size() == 1) { return new Object[]{ am.get(0), ovl.get(0) }; }
-    throw new IllegalArgumentException("Multiple methods found -- the method mapping is ambiguous");
+    else { return new Object[] { am.get(0), ovl.get(0) }; }
+    // throw new IllegalArgumentException("Multiple methods found -- the method mapping is ambiguous");
   }
   public void writeJavascript(HttpServletResponse response, Object obj) throws IOException {
     if (obj instanceof Throwable) {
