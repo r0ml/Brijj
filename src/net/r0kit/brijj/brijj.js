@@ -11,26 +11,34 @@ ${namespace} = new function() {
   };
 
   this._execute = function(path, scriptName, methodName, args) {
-    var la = args[args.length-1];
-    var callback, errorHandler = self.defaultErrorHandler;
-    if (typeof la == 'function') callback=la;
-    else { callback=la[0]; errorHandler=la[1];  }
-    
     var url = path + "/call/" + scriptName + "." +methodName;
     var body = "";
-    // var mime = "text/plain";
-    try { for (var i=0;i< args.length-1;i++) body += self.serialize(args[i]) + "\n"; }
+    try { for (var i=0;i< args.length;i++) body += self.serialize(args[i]) + "\n"; }
     catch(err) {
-      if (err == "fileUpload") { return sendIframe(url, args, callback, errorHandler); }
+      if (err == "fileUpload") { return sendIframe(url, args /*, callback, errorHandler */ ); }
       else if (err == "formUpload") { body = args[0]; }
       else return alert(err);
     }
 
     var req = new XMLHttpRequest();
-    req.onreadystatechange = function() { self.xhrStateChange(callback, errorHandler, req); };
+    req.callback = function(x) { console.log(x); };
+    req.errback = self.defaultErrorHandler;
+
     req.open("POST", url, true);
-    // req.setRequestHeader("Content-Type", "text/plain");
+    req.onreadystatechange = function() { self.xhrStateChange(req); };
     req.send(body);
+    /* This generates a potential race condition:  the send happens before the callback function is set */
+    return {
+      then: function(callback, errback) {
+        req.callback = callback;
+        if (errback != null) req.errback = errback;
+        return {
+          except: function(errback) {
+            req.errback = errback;
+          }
+        }
+      }
+    }
   };
 
   this.defaultErrorHandler = function(ex,q) {
@@ -86,7 +94,7 @@ ${namespace} = new function() {
       }
     };
 
-    this.xhrStateChange = function(callback, errorHandler, req) {
+    this.xhrStateChange = function(req) {
         var toEval;
         
         // Try to get the response HTTP status if applicable
@@ -102,16 +110,16 @@ ${namespace} = new function() {
         try {
           var reply = req.responseText;
           if (status != 200 && status != 0) {
-            self.handleException(errorHandler, { name:"brijj.http." + status, message:req.statusText }); }
+            self.handleException(req.errback, { name:"brijj.http." + status, message:req.statusText }); }
           else if (reply == null || reply == "") {
-            self.handleException(errorHandler, { name:"brijj.missingData", message:"No data received from server" }); }
+            self.handleException(req.errback, { name:"brijj.missingData", message:"No data received from server" }); }
           else {                     
             var contentType = req.getResponseHeader("Content-Type");
             toEval = reply; }
         }
-        catch (ex) { self.handleException(errorHandler, ex); }
+        catch (ex) { self.handleException(req.errback, ex); }
 
-        self.doResponse(callback,errorHandler,toEval);
+        self.doResponse(req.callback,req.errback,toEval);
         if (req) delete req;
       };
 
@@ -131,10 +139,12 @@ ${namespace} = new function() {
         div1.innerHTML = "<iframe src='about:blank' frameborder='0' name='xxxxx' style='width:0px;height:0px;border:0;display:none;'></iframe><form encType='multipart/form-data' encoding='multipart/form-data' method='POST' style='display:none'></form>";
         
         var iframe = div1.firstChild;
-        var fr = function() { self.doResponse(callback, errorHandler, iframe.contentDocument.body.innerHTML); document.body.removeChild(div1); delete div1; return true; };
+        iframe.callback = function(x) { console.log(x); }
+        iframe.errback = self.defaultErrorHandler;
+        var fr = function() { self.doResponse(iframe.callback, iframe.errback, iframe.contentDocument.body.innerHTML); document.body.removeChild(div1); delete div1; return true; };
         if (iframe.addEventListener) iframe.addEventListener("load", fr, true);
         if (iframe.attachEvent) iframe.attachEvent("onload", fr);
-
+        
         var form = div1.children[1];
         form.setAttribute("action", url);
         form.setAttribute("target", "xxxxx");
@@ -158,5 +168,17 @@ ${namespace} = new function() {
           }
         }
         form.submit();
+        /* This generates a potential race condition, the send happens before the callback is set */
+        return {
+          then: function(callback, errback) {
+            iframe.callback = callback;
+            if (errback != null) iframe.errback = errback;
+            return {
+              except: function(errback) {
+                iframe.errback = errback;
+              }
+            }
+          }
+        }
       };
 };
