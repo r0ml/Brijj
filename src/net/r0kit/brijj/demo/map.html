@@ -7,15 +7,15 @@
   <script type="text/javascript">
   function retrieveKeys() {
     var key = document.getElementById("demoKey").value;
-    Demo.getKeys(putList);
+    Demo.getKeys().then(putList);
   }
   function retrieveValue() {
     var key = document.getElementById("demoKey").value;
-    Demo.getValue(key, putValue);
+    Demo.getValue(key).then(putValue);
   }
   function retrieveMap() {
     var key = document.getElementById("demoKey").value;
-    Demo.getMap(key, putMap);
+    Demo.getMap(key).then(putMap);
   }
   function putValue(data) {
       document.getElementById("demoReply").innerHTML = data;

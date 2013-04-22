@@ -10,7 +10,7 @@
     var text = document.querySelector('[name=text]').value;
     var color = document.querySelector('[name=color]').value;
 
-    UploadDownload.uploadFiles(image, text, color, function(data) {
+    UploadDownload.uploadFiles(image, text, color).then(function(data) {
       var im = document.getElementById("image_div");
       im.innerHTML="";
       im.appendChild(data);

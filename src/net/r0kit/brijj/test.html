@@ -48,9 +48,9 @@
 		  else args.push( objectEval(te.value) );
 		}
 		var fn = (function(x) { setReply("d"+i,x); } );
-		args.push(fn);
+		// 	args.push(fn);
 		var o = window[s];
-		o[m].apply(o,args);
+		o[m].apply(o,args).then(fn);
 	}
 	
 </script>
