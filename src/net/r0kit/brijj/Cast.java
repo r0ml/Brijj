@@ -245,7 +245,7 @@ public class Cast {
     if (t == boolean.class) return (T) new Boolean(false);
     throw new CastException("null => " + t);
   }
-  protected <U, V> Map<U, V> castToMap(Class<? extends Map> r, Class<U> ck, Class<V> cv, Object z) {
+  protected <U, V> Map<U, V> castToMap(@SuppressWarnings("rawtypes") Class<? extends Map> r, Class<U> ck, Class<V> cv, Object z) {
     Map<U, V> res = null;
     if (r == Map.class) r = HashMap.class;
     try {
@@ -253,7 +253,7 @@ public class Cast {
     } catch (IllegalAccessException x) {} catch (InstantiationException x) {
       throw new CastException(x.toString());
     }
-    Map<U, V> mv = (Map<U, V>) z;
+    @SuppressWarnings("unchecked") Map<U, V> mv = (Map<U, V>) z;
     for (Map.Entry<U, V> e : mv.entrySet()) {
       U k = cast(ck, e.getKey());
       V v = cast(cv, e.getValue());

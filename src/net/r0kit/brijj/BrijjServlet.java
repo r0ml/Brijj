@@ -54,7 +54,7 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
     }
     else doPost(req, resp);
   }
-  public static class NotLoggedIn extends RuntimeException {
+  @SuppressWarnings("serial") public static class NotLoggedIn extends RuntimeException {
     @Override public String toString() { return "Not Logged In"; }
     @Override public String getMessage() { return "Not Logged In"; }
   }
@@ -120,9 +120,10 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
     }
     resp.setContentType(ft.mimeType);
     if (ft.size > 0) resp.setContentLength((int) ft.size);
-    if (ft.filename != null) {
+    /*if (ft.filename != null) {
       resp.setHeader("Content-Disposition", (ft.inline ? "inline" : "attachment") + ";filename=" + ft.filename);
-    }
+    }*/
+    resp.setHeader("Content-Disposition",(ft.inline ? "inline" : "attachment") + (ft.filename != null ? ";filename="+ft.filename : ""));
     if (ft.size < 0) resp.setHeader("Transfer-Encoding", "chunked");
     else resp.setHeader("Content-Transfer-Encoding", "binary");
     resp.setHeader("Expires", "0");

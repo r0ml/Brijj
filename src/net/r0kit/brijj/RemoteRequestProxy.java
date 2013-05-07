@@ -134,7 +134,7 @@ public abstract class RemoteRequestProxy {
       buffer.append("p." + methodName + " = function(");
       for (int j = 0; j < paramTypes.length; j++)
         buffer.append("p").append(j).append(", ");
-      buffer.append("callback) {  return brijj._execute(p._path, '");
+      buffer.append("callback) {\n  return brijj._execute(p._path, '");
       buffer.append(scriptName);
       buffer.append("', '");
       buffer.append(methodName);

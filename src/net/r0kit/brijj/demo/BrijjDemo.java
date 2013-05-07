@@ -32,7 +32,7 @@ public class BrijjDemo {
       w2.addInitParameter("listings", "true");
 
       Context ctx = tomcat.addContext("/", new File("..").getAbsolutePath());
-      Wrapper w = Tomcat.addServlet(ctx, "brijj", new BrijjServlet());
+      Tomcat.addServlet(ctx, "brijj", new BrijjServlet());
       ctx.setAllowCasualMultipartParsing(true);
       ctx.addServletMapping("/*", "brijj");
 
@@ -60,7 +60,7 @@ public class BrijjDemo {
     public Set<Object> getKeys() {
       return System.getProperties().keySet();
     }
-    private String hidden() {
+    @SuppressWarnings("unused") private String hidden() {
       return "This should not appear in the list of available methods";
     }
     protected String alsoHidden() {
