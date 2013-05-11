@@ -464,13 +464,22 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
     p.write(Json.escapeJavaScript(t.getMessage()));
     p.write("\"})");
   }
+  private static String getFilename(Part part) {
+    for (String cd : part.getHeader("content-disposition").split(";")) {
+        if (cd.trim().startsWith("filename=")) {
+            return cd.substring(cd.indexOf('=') + 1).trim().replace("\"", "");
+        }
+    }
+    return null;
+}
   private static Object readObject(Part z) {
     try {
       String ct = z.getContentType();
       if (ct == null) return readObject(readAllTextFrom(new InputStreamReader(z.getInputStream(),"UTF-8")));
       else if (ct.startsWith("image/")) return ImageIO.read(z.getInputStream());
-      else if (ct.startsWith("text/")) return readAllTextFrom(new InputStreamReader(z.getInputStream(), "UTF-8"));
-      else return readAllBytesFrom(z.getInputStream());
+      else return new FileTransfer(getFilename(z), ct, readAllBytesFrom(z.getInputStream()), null);
+      // else if (ct.startsWith("text/")) return readAllTextFrom(new InputStreamReader(z.getInputStream(), "UTF-8"));
+      // else return readAllBytesFrom(z.getInputStream());
     } catch (IOException ex) {
       return null;
     }
@@ -502,17 +511,21 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
       LinkedList<Object> ll = new LinkedList<Object>();
       StringTokenizer st = new StringTokenizer(v, ",");
       while (st.hasMoreElements())
-        ll.add(readObject(/* urlDecode( */ st.nextToken() /*)*/ ));
+        ll.add(readObject(
+            urlDecode( st.nextToken() ) ));
       Cast ca = new Cast();
       if (ll.get(0).getClass().equals(Integer.class)) return ca.castToArray(Integer.TYPE, ll);
       else if (ll.get(0).getClass().equals(Double.class)) return ca.castToArray(Double.TYPE, ll);
-      else throw new RuntimeException("failed to parse array");
+      else return ca.castToArray(ll.get(0).getClass(),  ll);
+      // else throw new RuntimeException("failed to parse array");
     }
     case 'o': {
       HashMap<String, Object> hm = new HashMap<String, Object>();
       StringTokenizer st = new StringTokenizer(v.substring(1, v.length() - 1), ",");
       while (st.hasMoreElements()) {
-        String tkn = st.nextToken(); // urlDecode(st.nextToken());
+        String tkn = st.nextToken(); 
+        // needed sometime, not others?
+        tkn = urlDecode(tkn);
         int n = tkn.indexOf(':');
         hm.put(tkn.substring(0, n).trim(), readObject(tkn.substring(n + 1)));
       }

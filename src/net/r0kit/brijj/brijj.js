@@ -83,7 +83,7 @@ ${namespace} = new function() {
               var nft = false, reply = "o:{";
               for (var element in data) {
             	  if (nft) reply += ", "; else nft = true;
-            	  reply += encodeURIComponent(element) + ":"+self.serialize(data[element]);
+            	  reply += encodeURIComponent(element + ":"+self.serialize(data[element]));
               }
               return reply + "}";
         }

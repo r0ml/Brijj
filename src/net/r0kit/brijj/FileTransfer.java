@@ -34,6 +34,13 @@ public class FileTransfer {
       Logger.getLogger(getClass().getName()).log(Level.WARNING, "creating image input stream: " + iox);
     }
   }
+  public FileTransfer(String f, String m, InputStream is, HttpServletRequest req) {
+    this.req = req;
+    this.filename = f;
+    this.mimeType = m;
+    this.inputStream = is;
+    this.size = -1;
+  }
   public FileTransfer(String f, String m, final byte[] bytes, HttpServletRequest req) {
     this.req = req;
     this.filename = f;
@@ -74,7 +81,7 @@ public class FileTransfer {
       return null;
     }
   }
-  private byte[] getBytes() throws IOException {
+  public byte[] getBytes() throws IOException {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     byte[] buffer = new byte[4096];
     InputStream i = getInputStream();
@@ -83,7 +90,10 @@ public class FileTransfer {
       if (n <= 0) break;
       bos.write(buffer, 0, n);
     }
-    return bos.toByteArray();
+    byte[] res = bos.toByteArray();
+    this.inputStream = new ByteArrayInputStream(res);
+    this.size = res.length;
+    return res;
   }
   public Object asObject() {
     if (mimeType.startsWith("text/")) return asString();
