@@ -1,46 +1,103 @@
 
-${namespace} = new function() {
-	var self = this;
-	
-  this.handleDownload = function(data) {
-	  var form = document.createElement("form");
-	  form.action=data;
-	  form.method="POST";
-	  document.body.appendChild(form);
-	  form.submit();
-  };
 
-  this._execute = function(path, scriptName, methodName, args) {
-    var url = path + "/call/" + scriptName + "." +methodName;
-    var body = "";
-    try { for (var i=0;i< args.length;i++) body += self.serialize(args[i]) + "\n"; }
-    catch(err) {
-      if (err == "fileUpload") { return sendIframe(url, args /*, callback, errorHandler */ ); }
-      else if (err == "formUpload") { body = args[0]; }
-      else return alert(err);
-    }
+angular.module('brijj',[]).
+ factory('SWBrijj', function($http,$q) {
+   return {
+     _path: '/brijj/',
+     _execute: function(path, scriptName, methodName, args) {
+       var url = path + "/call/" + scriptName + "." +methodName;
+       var body = "";
+       try { for (var i=0;i< args.length;i++) body += this._serialize(args[i]) + "\n"; }
+       catch(err) {
+         if (err == "fileUpload") { return sendIframe(url, args, callback, errorHandler); }
+         else if (err == "formUpload") { body = args[0]; }
+         else return alert(err);
+       }
 
-    var req = new XMLHttpRequest();
-    req.callback = function(x) { console.log(x); };
-    req.errback = self.defaultErrorHandler;
+       var req = $http.post(url, body);
+       
+/*       return {
+         then: function(x) { req.success( { }); }
+       }
+       req.then = req.success;
+       req.except = req.error;
+  */     
+       // req.callback = function(x) { console.log(x); };
+       // req.errback = self.defaultErrorHandler;
 
-    req.open("POST", url, true);
-    req.onreadystatechange = function() { self.xhrStateChange(req); };
-    req.send(body);
-    /* This generates a potential race condition:  the send happens before the callback function is set */
-    return {
-      then: function(callback, errback) {
-        req.callback = callback;
-        if (errback != null) req.errback = errback;
-        return {
-          except: function(errback) {
-            req.errback = errback;
-          }
-        }
-      }
-    }
-  };
+       if (req.status == 200 || req.status == 0) {
+         switch(req.data[0]) {
+         case 'c': self.handleCallback(callback, eval(toEval.substring(2))); break;
+         case 'x': self.handleException( errorHandler, eval(toEval.substring(2)) ); break;
+         default: alert("unknown server-response type: "+toEval[0]);
+         }
+       }
 
+       
+       return {
+         then: function(x) {
+           var zfn = function(z) {
+             switch( z.data[0]) {
+             case 'c': x.apply(window, [eval(z.data.substring(2))]); break;
+             case 'x': alert( eval(z.data.substring(2)) ); break;
+             default: alert("unknown server-response type: "+z.data[0]);
+             };
+           };
+           req.then( zfn );
+           return {
+             except: function(y) {
+               req.then(zfn, y);
+             } 
+           }
+         }
+       }
+     },
+     _serialize: function(data) {
+       if (data == null) { return "z:"; }
+       switch (typeof data) {
+       case "boolean": return "b:" + data;
+       case "number": return "n:" + data;
+       case "string": return "s:" + encodeURIComponent(data);
+       case "object":
+         var objstr = Object.prototype.toString.call(data);
+         if (objstr == "[object String]") return "s:" + encodeURIComponent(data);
+         else if (objstr == "[object Boolean]") return "b:" + data;
+         else if (objstr == "[object Number]") return  "n:" + data;
+         else if (objstr == "[object Date]") return "d:" + data.getTime();
+         else if (objstr == "[object Array]") {
+             var reply = "a:[";
+             for (var i = 0; i < data.length; i++) {
+               if (i != 0) reply += ",";
+               reply += encodeURIComponent(self.serialize(data[i]));
+             }
+           return reply + "]"; }
+         else if (objstr == "[object FormData]") {
+           throw "formUpload";
+         }
+         else if (data && data.tagName && data.tagName.toLowerCase() == "input" && data.type && data.type.toLowerCase() == "file") {
+           throw "fileUpload";
+         }
+         else {
+               var nft = false, reply = "o:{";
+               for (var element in data) {
+                 if (nft) reply += ", "; else nft = true;
+                 reply += encodeURIComponent(element + ":"+this._serialize(data[element]));
+               }
+               return reply + "}";
+         }
+         break;
+       default:
+         alert("serializing unknown data type: "+typeof data);
+         return "u:" + data;
+       }
+     },
+
+{{functions}}
+   }
+ });
+
+
+/*
   this.defaultErrorHandler = function(ex,q) {
 	  alert((ex.javaClassName ? ex.javaClassName : "" )+": "+ex.message);
 	  console.log({error: ex, request: q});
@@ -54,45 +111,6 @@ ${namespace} = new function() {
     errorHandler.apply(window,[reply]);
   };
 
-  this.serialize = function(data) {
-      if (data == null) { return "z:"; }
-      switch (typeof data) {
-      case "boolean": return "b:" + data;
-      case "number": return "n:" + data;
-      case "string": return "s:" + encodeURIComponent(data);
-      case "object":
-        var objstr = Object.prototype.toString.call(data);
-        if (objstr == "[object String]") return "s:" + encodeURIComponent(data);
-        else if (objstr == "[object Boolean]") return "b:" + data;
-        else if (objstr == "[object Number]") return  "n:" + data;
-        else if (objstr == "[object Date]") return "d:" + data.getTime();
-        else if (objstr == "[object Array]") {
-            var reply = "a:[";
-            for (var i = 0; i < data.length; i++) {
-              if (i != 0) reply += ",";
-              reply += encodeURIComponent(self.serialize(data[i]));
-            }
-          return reply + "]"; }
-        else if (objstr == "[object FormData]") {
-          throw "formUpload";
-        }
-        else if (data && data.tagName && data.tagName.toLowerCase() == "input" && data.type && data.type.toLowerCase() == "file") {
-          throw "fileUpload";
-        }
-        else {
-              var nft = false, reply = "o:{";
-              for (var element in data) {
-            	  if (nft) reply += ", "; else nft = true;
-            	  reply += encodeURIComponent(element + ":"+self.serialize(data[element]));
-              }
-              return reply + "}";
-        }
-        break;
-      default:
-        alert("serializing unknown data type: "+typeof data);
-        return "u:" + data;
-      }
-    };
 
     this.xhrStateChange = function(req) {
         var toEval;
@@ -168,7 +186,7 @@ ${namespace} = new function() {
           }
         }
         form.submit();
-        /* This generates a potential race condition, the send happens before the callback is set */
+        // This generates a potential race condition, the send happens before the callback is set
         return {
           then: function(callback, errback) {
             iframe.callback = callback;
@@ -183,4 +201,5 @@ ${namespace} = new function() {
       };
 };
 
-{{functions}}
+*/
+

@@ -43,7 +43,8 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
   @Override public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
     String pathInfo = req.getPathInfo();
     if (pathInfo == null || pathInfo.length() == 0 || "/".equals(pathInfo)) doIndex(req, resp);
-    else if (pathInfo.equals("/brijj.js")) doEngine(req, resp);
+    else if (pathInfo.equals("/brijj.js")) doEngine(req, resp, false);
+    else if (pathInfo.equals("/aBrijj.js")) doEngine(req, resp, true);
     else if (pathInfo.startsWith("/test/")) doTest(req, resp, pathInfo.substring("/test/".length()).replaceAll("\\.js$", ""));
     else if (pathInfo.startsWith("/download/")) doDownload(req, resp, Integer.parseInt(pathInfo.substring("/download/".length())));
     else if (pathInfo.startsWith("/call/")) {
@@ -176,13 +177,14 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
     resp.setContentType("text/html");
     resp.getWriter().println(generateTestPage(h, src));
   }
-  public void doEngine(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+  public void doEngine(HttpServletRequest req, HttpServletResponse resp, boolean angular) throws IOException {
     InputStream raw = null;
     String rsrc = null;
     try {
       // getClass() is incorrect here because then subclasses won't work
-      raw = BrijjServlet.class.getResourceAsStream("brijj.js");
-      if (raw == null) { throw new IOException("Failed to find brijj.js"); }
+      String ss = angular ? "aBrijj.js" : "brijj.js";
+      raw = BrijjServlet.class.getResourceAsStream(ss);
+      if (raw == null) { throw new IOException("Failed to find "+ss); }
       rsrc = readAllTextFrom(new InputStreamReader(raw));
     } finally {
       if (raw != null) raw.close();
@@ -200,17 +202,89 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
     resp.setDateHeader("Last-Modified", lastModified);
     resp.setHeader("ETag", "\"" + lastModified + '\"');
     PrintWriter out = resp.getWriter();
-    out.print(rsrc);
-    for (String rpn : RemoteRequestProxy.getProxyNames()) {
-      try {
-        RemoteRequestProxy rp = RemoteRequestProxy.getModule(rpn, null, null);
-        String s = rp.generateInterfaceScript(req.getContextPath() + req.getServletPath(), rpn);
-        out.println(s);
-      } catch (ClassNotFoundException ignore) {
-        System.err.println(ignore);
+    
+    StringBuffer sb = new StringBuffer();
+    if (angular) {
+      for (String rpn : RemoteRequestProxy.getProxyNames()) {
+        sb.append(generateInterfaceScriptAngular(req.getContextPath() + req.getServletPath(), rpn));
+        sb.append("\n\n");
+      }
+    } else {
+      for (String rpn : RemoteRequestProxy.getProxyNames()) {
+        sb.append(generateInterfaceScript(req.getContextPath() + req.getServletPath(), rpn));
+        sb.append("\n\n");
       }
     }
+    rsrc = rsrc.replace("{{functions}}", sb.toString());
+    out.print(rsrc);
   }
+  
+  public String generateInterfaceScript(String csp, String scriptName) {
+    RemoteRequestProxy module;
+    try {
+      module = RemoteRequestProxy.getModule(scriptName, null, null);
+    } catch (ClassNotFoundException ignore) {
+      System.err.println(ignore.toString());
+      return "";
+    }
+    StringBuilder buffer = new StringBuilder();
+    // defines the java classes in the global context
+    buffer.append("\n(function() {  var _ = window; if (_." + scriptName + " == undefined) {\n    var p;");
+    buffer.append("p = {}; p._path = '" + csp + "';\n");
+    for (Method method : module.getMethodList()) {
+      String methodName = method.getName();
+      // Is it on the list of banned names
+      if (Json.isReserved(methodName)) continue;
+      Class<?>[] paramTypes = method.getParameterTypes();
+      // Create the function definition
+      buffer.append("p." + methodName + " = function(  ");
+      for (int j = 0; j < paramTypes.length; j++)
+        buffer.append("p").append(j).append(", ");
+      buffer.setLength(buffer.length()-2);
+      buffer.append(") {\n  return brijj._execute(p._path, '");
+      buffer.append(scriptName);
+      buffer.append("', '");
+      buffer.append(methodName);
+      buffer.append("\', arguments); };\n");
+    }
+    buffer.append("    _." + scriptName + "=p; } })();\n");
+    return buffer.toString();
+  }
+
+
+  public String generateInterfaceScriptAngular(String csp, String scriptName) {
+    RemoteRequestProxy module;
+    try {
+      module = RemoteRequestProxy.getModule(scriptName, null, null);
+    } catch (ClassNotFoundException ignore) {
+      System.err.println(ignore.toString());
+      return "";
+    }
+    StringBuilder buffer = new StringBuilder();
+    // defines the java classes in the global context
+    for (Method method : module.getMethodList()) {
+      String methodName = method.getName();
+      // Is it on the list of banned names
+      if (Json.isReserved(methodName)) continue;
+      Class<?>[] paramTypes = method.getParameterTypes();
+      // Create the function definition
+      buffer.append("     "+methodName + ": function(  ");
+      for (int j = 0; j < paramTypes.length; j++)
+        buffer.append("p").append(j).append(", ");
+      buffer.setLength(buffer.length()-2);
+      buffer.append(") {\n  return this._execute(this._path, '");
+      buffer.append(scriptName);
+      buffer.append("', '");
+      buffer.append(methodName);
+      buffer.append("\', arguments); },\n");
+    }
+    return buffer.toString();
+  }
+
+
+  
+  
+  
   @Override public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
     try {
       String pathInfo = request.getPathInfo();

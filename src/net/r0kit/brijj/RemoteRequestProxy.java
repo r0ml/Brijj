@@ -112,37 +112,7 @@ public abstract class RemoteRequestProxy {
   }
   public String getUserId() {
     return (String)this.sess.getAttribute(RemoteRequestProxy.loginAttribute); 
-  }
-  public String generateInterfaceScript(String csp, String scriptName) {
-    RemoteRequestProxy module;
-    try {
-      module = RemoteRequestProxy.getModule(scriptName, null, null);
-    } catch (ClassNotFoundException ignore) {
-      System.err.println(ignore.toString());
-      return "";
-    }
-    StringBuilder buffer = new StringBuilder();
-    // defines the java classes in the global context
-    buffer.append("\n(function() {  var _ = window; if (_." + scriptName + " == undefined) {\n    var p;");
-    buffer.append("p = {}; p._path = '" + csp + "';\n");
-    for (Method method : module.getMethodList()) {
-      String methodName = method.getName();
-      // Is it on the list of banned names
-      if (Json.isReserved(methodName)) continue;
-      Class<?>[] paramTypes = method.getParameterTypes();
-      // Create the function definition
-      buffer.append("p." + methodName + " = function(");
-      for (int j = 0; j < paramTypes.length; j++)
-        buffer.append("p").append(j).append(", ");
-      buffer.append("callback) {\n  return brijj._execute(p._path, '");
-      buffer.append(scriptName);
-      buffer.append("', '");
-      buffer.append(methodName);
-      buffer.append("\', arguments); };\n");
-    }
-    buffer.append("    _." + scriptName + "=p; } })();\n");
-    return buffer.toString();
-  }
+  }  
   public static interface Remotable {
     public Object toRemote();
   }
