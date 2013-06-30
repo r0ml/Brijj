@@ -1,7 +1,7 @@
 
 
-angular.module('brijj',[]).
- factory('SWBrijj', function($http,$q) {
+angular.module('brijj',[])
+  .factory('SWBrijj', ['$http','$q', function($http,$q) {
    return {
      _path: '/brijj/',
      _execute: function(path, scriptName, methodName, args) {
@@ -94,7 +94,7 @@ angular.module('brijj',[]).
 
 {{functions}}
    }
- });
+ }]);
 
 
 /*
