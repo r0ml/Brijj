@@ -4,6 +4,7 @@ angular.module('brijj',[])
   .factory('SWBrijj', ['$http','$q', function($http,$q) {
    return {
      _path: '/brijj/',
+     defaultErrorHandler: function(x) { alert(x.javaClass+": "+x.message); },
      _execute: function(path, scriptName, methodName, args) {
        var url = path + "/call/" + scriptName + "." +methodName;
        var body = "";
@@ -39,11 +40,14 @@ angular.module('brijj',[])
            var zfn = function(z) {
              switch( z.data[0]) {
              case 'c': x.apply(window, [eval(z.data.substring(2))]); break;
-             case 'x': alert( eval(z.data.substring(2)) ); break;
+             case 'x': { var err = eval(z.data.substring(2));
+               alert( err.javaClassName+": "+err.message );
+                 break;
+             }
              default: alert("unknown server-response type: "+z.data[0]);
              };
            };
-           req.then( zfn );
+           req.then( zfn, this.defaultErrorHandler );
            return {
              except: function(y) {
                req.then(zfn, y);
