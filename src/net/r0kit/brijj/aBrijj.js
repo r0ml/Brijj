@@ -17,10 +17,10 @@ angular.module('brijj',[])
            body = args[0];
            var req = new XMLHttpRequest();
            req.callback = function(x) { console.log(x); };
-           req.errback = self.defaultErrorHandler;
+           req.errback = this.defaultErrorHandler;
 
            req.open("POST", url, true);
-           req.onreadystatechange = function() { self.xhrStateChange(req); };
+           req.onreadystatechange = function() { this.xhrStateChange(req); };
            var res = {
              then: function(callback, errback) {
                req.callback = callback;
@@ -51,14 +51,14 @@ angular.module('brijj',[])
        // req.callback = function(x) { console.log(x); };
        // req.errback = self.defaultErrorHandler;
 
-       if (req.status == 200 || req.status == 0) {
+     /*  if (req.status == 200 || req.status == 0) {
          switch(req.data[0]) {
          case 'c': self.handleCallback(callback, eval(toEval.substring(2))); break;
          case 'x': self.handleException( errorHandler, eval(toEval.substring(2)) ); break;
          default: alert("unknown server-response type: "+toEval[0]);
          }
        }
-
+     */
        
        return {
          then: function(x) {
@@ -81,6 +81,58 @@ angular.module('brijj',[])
          }
        }
      },
+    
+     // *******************************************************************************
+     // only for FormData case
+     xhrStateChange: function(req) {
+       var toEval;
+       
+       // Try to get the response HTTP status if applicable
+       var status = req.readyState >= 2 ? req.status : 0;
+       
+       // If we couldn't get the status we bail out, unless the request is
+       // complete, which means error (handled further below)
+       if (status == 0 && req.readyState < 4) return;
+       
+       // The rest of this function only deals with request completion
+       if (req.readyState != 4) return;
+
+       try {
+         var reply = req.responseText;
+         if (status != 200 && status != 0) {
+           this.handleException(req.errback, { name:"brijj.http." + status, message:req.statusText }); }
+         else if (reply == null || reply == "") {
+           self.handleException(req.errback, { name:"brijj.missingData", message:"No data received from server" }); }
+         else {                     
+           var contentType = req.getResponseHeader("Content-Type");
+           toEval = reply; }
+       }
+       catch (ex) { this.handleException(req.errback, ex); }
+
+       this.doResponse(req.callback,req.errback,toEval);
+       if (req) delete req;
+     },
+
+     handleException: function(errorHandler, reply) {
+       errorHandler.apply(window,[reply]);
+     },
+      doResponse: function(callback, errorHandler, toEval) {
+        if (toEval) {
+        switch(toEval[0]) {
+        case 'c': this.handleCallback(callback, eval(toEval.substring(2))); break;
+        case 'x': this.handleException( errorHandler, eval(toEval.substring(2)) ); break;
+        default: alert("unknown server-response type: "+toEval[0]);
+        }
+        }
+      },
+      handleCallback: function(cb,reply) {
+        if (cb == console.log) console.log(reply); else if (cb) cb.apply(window, [ reply ]);
+      },
+
+      // *******************************************************************************
+
+     
+     
      _serialize: function(data) {
        if (data == null) { return "z:"; }
        switch (typeof data) {
@@ -97,7 +149,7 @@ angular.module('brijj',[])
              var reply = "a:[";
              for (var i = 0; i < data.length; i++) {
                if (i != 0) reply += ",";
-               reply += encodeURIComponent(self.serialize(data[i]));
+               reply += encodeURIComponent(this._serialize(data[i]));
              }
            return reply + "]"; }
          else if (objstr == "[object FormData]") {
@@ -132,53 +184,6 @@ angular.module('brijj',[])
 	  console.log({error: ex, request: q});
   }
   
-  this.handleCallback = function(cb,reply) {
-    if (cb == console.log) console.log(reply); else if (cb) cb.apply(window, [ reply ]);
-  };
-
-  this.handleException = function(errorHandler, reply) {
-    errorHandler.apply(window,[reply]);
-  };
-
-
-    this.xhrStateChange = function(req) {
-        var toEval;
-        
-        // Try to get the response HTTP status if applicable
-        var status = req.readyState >= 2 ? req.status : 0;
-        
-        // If we couldn't get the status we bail out, unless the request is
-        // complete, which means error (handled further below)
-        if (status == 0 && req.readyState < 4) return;
-        
-        // The rest of this function only deals with request completion
-        if (req.readyState != 4) return;
-
-        try {
-          var reply = req.responseText;
-          if (status != 200 && status != 0) {
-            self.handleException(req.errback, { name:"brijj.http." + status, message:req.statusText }); }
-          else if (reply == null || reply == "") {
-            self.handleException(req.errback, { name:"brijj.missingData", message:"No data received from server" }); }
-          else {                     
-            var contentType = req.getResponseHeader("Content-Type");
-            toEval = reply; }
-        }
-        catch (ex) { self.handleException(req.errback, ex); }
-
-        self.doResponse(req.callback,req.errback,toEval);
-        if (req) delete req;
-      };
-
-   this.doResponse = function(callback, errorHandler, toEval) {
-     if (toEval) {
-     switch(toEval[0]) {
-     case 'c': self.handleCallback(callback, eval(toEval.substring(2))); break;
-     case 'x': self.handleException( errorHandler, eval(toEval.substring(2)) ); break;
-     default: alert("unknown server-response type: "+toEval[0]);
-     }
-     }
-   }
    
    this.sendIframe = function(url, args, callback, errorHandler) {
         var div1 = document.createElement("div");
