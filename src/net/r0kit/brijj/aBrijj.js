@@ -1,5 +1,7 @@
 
-
+/* */
+/* bbbb = function(res) { angular.module('aaa',[]).service('bbb', function($q,$http) { ccc.$http = $http; ccc.$q = $q; } ); return ccc; } */
+/* angular.module('main',['aaa']).controller('zzz',function(bbb) {}); */
 angular.module('brijj',[])
   .factory('SWBrijj', ['$http','$q', function($http,$q) {
    return {
@@ -11,7 +13,30 @@ angular.module('brijj',[])
        try { for (var i=0;i< args.length;i++) body += this._serialize(args[i]) + "\n"; }
        catch(err) {
          if (err == "fileUpload") { return sendIframe(url, args, callback, errorHandler); }
-         else if (err == "formUpload") { body = args[0]; }
+         else if (err == "formUpload") { 
+           body = args[0];
+           var req = new XMLHttpRequest();
+           req.callback = function(x) { console.log(x); };
+           req.errback = self.defaultErrorHandler;
+
+           req.open("POST", url, true);
+           req.onreadystatechange = function() { self.xhrStateChange(req); };
+           var res = {
+             then: function(callback, errback) {
+               req.callback = callback;
+               if (errback != null) req.errback = errback;
+               return {
+                 except: function(errback) {
+                   req.errback = errback;
+                 }
+               }
+             }
+           }
+           req.send(body);
+//           var promise = $q.defer().promise;
+//           return promise;
+           return res;
+         }
          else return alert(err);
        }
 
