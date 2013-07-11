@@ -41,7 +41,7 @@ angular.module('brijj',[])
        }
 
        var req = $http.post(url, body);
-       
+       req.brijj = this;
 /*       return {
          then: function(x) { req.success( { }); }
        }
@@ -72,10 +72,10 @@ angular.module('brijj',[])
              default: alert("unknown server-response type: "+z.data[0]);
              };
            };
-           req.then( zfn, this.defaultErrorHandler );
+           req.then( zfn, req.brijj.defaultErrorHandler );
            return {
              except: function(y) {
-               req.then(zfn, y);
+               req.error(y);
              } 
            }
          }
