@@ -20,7 +20,11 @@ angular.module('brijj',[])
            req.errback = this.defaultErrorHandler;
 
            req.open("POST", url, true);
-           req.onreadystatechange = function() { this.xhrStateChange(req); };
+           req.xhrStateChange = this.xhrStateChange;
+           req.doResponse = this.doResponse;
+           req.handleException = this.handleException;
+           req.onreadystatechange = function() {
+             req.xhrStateChange(req); };
            var res = {
              then: function(callback, errback) {
                req.callback = callback;
@@ -100,16 +104,16 @@ angular.module('brijj',[])
        try {
          var reply = req.responseText;
          if (status != 200 && status != 0) {
-           this.handleException(req.errback, { name:"brijj.http." + status, message:req.statusText }); }
+           req.handleException(req.errback, { name:"brijj.http." + status, message:req.statusText }); }
          else if (reply == null || reply == "") {
-           self.handleException(req.errback, { name:"brijj.missingData", message:"No data received from server" }); }
+           req.handleException(req.errback, { name:"brijj.missingData", message:"No data received from server" }); }
          else {                     
            var contentType = req.getResponseHeader("Content-Type");
            toEval = reply; }
        }
-       catch (ex) { this.handleException(req.errback, ex); }
+       catch (ex) { req.handleException(req.errback, ex); }
 
-       this.doResponse(req.callback,req.errback,toEval);
+       req.doResponse(req.callback,req.errback,toEval);
        if (req) delete req;
      },
 
