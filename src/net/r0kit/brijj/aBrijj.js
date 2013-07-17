@@ -23,6 +23,7 @@ angular.module('brijj',[])
            req.xhrStateChange = this.xhrStateChange;
            req.doResponse = this.doResponse;
            req.handleException = this.handleException;
+           req.handleCallback = this.handleCallback;
            req.onreadystatechange = function() {
              req.xhrStateChange(req); };
            var res = {
