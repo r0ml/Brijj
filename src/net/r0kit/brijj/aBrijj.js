@@ -71,15 +71,18 @@ angular.module('brijj',[])
              switch( z.data[0]) {
              case 'c': x.apply(window, [eval(z.data.substring(2))]); break;
              case 'x': { var err = eval(z.data.substring(2));
-               alert( err.javaClassName+": "+err.message );
-                 break;
+               // alert( err.javaClassName+": "+err.message );
+               req.errorHandler(err);
+               break;
              }
              default: alert("unknown server-response type: "+z.data[0]);
              };
            };
+           req.errorHandler = req.brijj.defaultErrorHandler;
            req.then( zfn, req.brijj.defaultErrorHandler );
            return {
              except: function(y) {
+               req.errorHandler = y;
                req.error(y);
              } 
            }
