@@ -17,7 +17,11 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Cast {
   // The below copied from R0Kit
@@ -389,4 +393,39 @@ public class Cast {
     String s = clazz + "." + mthnam + "(" + (sb.length() > 0 ? sb.toString().substring(1) : "") + ")";
     throw new NoSuchMethodException(s);
   }
+  
+  
+  private static Set<Class<?>> getClassesBfs(Class<?> clazz) {
+    Set<Class<?>> classes = new LinkedHashSet<Class<?>>();
+    Set<Class<?>> nextLevel = new LinkedHashSet<Class<?>>();
+    nextLevel.add(clazz);
+    do {
+        classes.addAll(nextLevel);
+        Set<Class<?>> thisLevel = new LinkedHashSet<Class<?>>(nextLevel);
+        nextLevel.clear();
+        for (Class<?> each : thisLevel) {
+            Class<?> superClass = each.getSuperclass();
+            if (superClass != null) nextLevel.add(superClass);
+            for (Class<?> eachInt : each.getInterfaces()) nextLevel.add(eachInt);
+        }
+    } while (!nextLevel.isEmpty());
+    return classes;
+  }
+
+  public static Class<?>[] commonSuperClasses(Collection<Class<?>> cc) {
+    // start off with set from first hierarchy
+    Class<?>[] classes = new Class<?>[cc.size()];
+    cc.toArray(classes);
+    if (classes.length == 0) return new Class<?>[] { Object.class };
+    Set<Class<?>> rollingIntersect = new LinkedHashSet<Class<?>>(getClassesBfs(classes[0]));
+    // intersect with next
+    for (int i = 1; i < classes.length; i++) {
+        rollingIntersect.retainAll(getClassesBfs(classes[i]));
+    }
+    return rollingIntersect.toArray( new Class<?>[rollingIntersect.size()]);
+  }
+  
+  
+  
+  
 }

@@ -21,10 +21,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.StringTokenizer;
 import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
@@ -511,7 +513,7 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
     }
     if (am.isEmpty()) {
       // Not even a name match
-      throw new IllegalArgumentException("Method not found. See logs for details");
+      throw new IllegalArgumentException("Method not found: "+methodName);
     } else if (am.size() == 1) { return new Object[]{ am.get(0), ovl.get(0) }; }
     else { return new Object[] { am.get(0), ovl.get(0) }; }
     // throw new IllegalArgumentException("Multiple methods found -- the method mapping is ambiguous");
@@ -588,10 +590,14 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
         ll.add(readObject(
             urlDecode( st.nextToken() ) ));
       Cast ca = new Cast();
-      if (ll.get(0).getClass().equals(Integer.class)) return ca.castToArray(Integer.TYPE, ll);
-      else if (ll.get(0).getClass().equals(Double.class)) return ca.castToArray(Double.TYPE, ll);
-      else return ca.castToArray(ll.get(0).getClass(),  ll);
-      // else throw new RuntimeException("failed to parse array");
+      if (ll.size() == 0) return ca.castToArray(Object.class,  ll);
+      Set<Class<?>> classes = new HashSet<Class<?>>();
+      for(Object o : ll) classes.add(o.getClass());
+      Class<?>[]tc = Cast.commonSuperClasses(classes); 
+      Class<?> nc = tc.length == 0 ? Object.class : tc[0];
+      if (nc.equals(Integer.class)) nc = Integer.TYPE;
+      else if (nc.equals(Double.class)) nc = Double.TYPE;
+      return ca.castToArray(nc,  ll);
     }
     case 'o': {
       HashMap<String, Object> hm = new HashMap<String, Object>();
