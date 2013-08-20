@@ -6,7 +6,7 @@ angular.module('brijj',[])
   .factory('SWBrijj', ['$http','$q', function($http,$q) {
    return {
      _path: '/brijj/',
-     defaultErrorHandler: function(x) { alert(x.javaClass+": "+x.message); },
+     defaultErrorHandler: function(x) { alert(x.javaClassName+": "+x.message); },
      _execute: function(path, scriptName, methodName, args) {
        var url = path + "/call/" + scriptName + "." +methodName;
        var body = "";
