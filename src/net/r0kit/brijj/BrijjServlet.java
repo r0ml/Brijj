@@ -207,7 +207,9 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
     
     StringBuffer sb = new StringBuffer();
     if (angular) {
+      /* FIXME:  This only works for a single Brijj Servlet */
       for (String rpn : RemoteRequestProxy.getProxyNames()) {
+        rsrc = rsrc.replace("{{scriptName}}", rpn);
         sb.append(generateInterfaceScriptAngular(req.getContextPath() + req.getServletPath(), rpn));
         sb.append("\n\n");
       }
@@ -274,7 +276,7 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
       for (int j = 0; j < paramTypes.length; j++)
         buffer.append("p").append(j).append(", ");
       buffer.setLength(buffer.length()-2);
-      buffer.append(") {\n  return this._execute(this._path, '");
+      buffer.append(") {\n  return this._execute('");
       buffer.append(scriptName);
       buffer.append("', '");
       buffer.append(methodName);

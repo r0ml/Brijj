@@ -3,12 +3,13 @@
 /* bbbb = function(res) { angular.module('aaa',[]).service('bbb', function($q,$http) { ccc.$http = $http; ccc.$q = $q; } ); return ccc; } */
 /* angular.module('main',['aaa']).controller('zzz',function(bbb) {}); */
 angular.module('brijj',[])
-  .factory('SWBrijj', ['$http','$q', function($http,$q) {
+  .factory('{{scriptName}}', ['$http','$q', function($http,$q) {
    return {
      _path: '/brijj/',
-     defaultErrorHandler: function(x) { alert(x.javaClassName+": "+x.message); },
-     _execute: function(path, scriptName, methodName, args) {
-       var url = path + "/call/" + scriptName + "." +methodName;
+     defaultErrorHandler: function(x) {
+       alert(x.javaClassName+": "+x.message); },
+     _execute: function(scriptName, methodName, args) {
+       var url = this._path + "/call/" + scriptName + "." +methodName;
        var body = "";
        try { for (var i=0;i< args.length;i++) body += this._serialize(args[i]) + "\n"; }
        catch(err) {
@@ -180,6 +181,25 @@ angular.module('brijj',[])
          return "u:" + data;
        }
      },
+         
+     _sync: function(scriptName, methodName, args) {
+       var url = this._path + "/call/" + scriptName + "." +methodName;
+       var body = "";
+       for (var i=0;i< args.length;i++) body += this._serialize(args[i]) + "\n";
+
+       var req = new XMLHttpRequest();
+       req.open("POST", url, false);
+       req.send(body);
+       var rsp = req.response;
+       switch(rsp[0]) {
+         case 'c': return eval(rsp.substring(2)); 
+         case 'x': throw eval(toEval.substring(2));
+         default: alert("unknown server-response type: "+rsp[0]);
+       }
+     },
+
+     
+     
 
 {{functions}}
    }
