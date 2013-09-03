@@ -3,7 +3,7 @@
 /* bbbb = function(res) { angular.module('aaa',[]).service('bbb', function($q,$http) { ccc.$http = $http; ccc.$q = $q; } ); return ccc; } */
 /* angular.module('main',['aaa']).controller('zzz',function(bbb) {}); */
 angular.module('brijj',[])
-  .factory('{{scriptName}}', ['$http','$q', function($http,$q) {
+  .factory('{{scriptName}}', ['$http','$q','$injector', function($http,$q,$injector) {
    return {
      _path: '/brijj/',
      defaultErrorHandler: function(x) {
@@ -38,8 +38,15 @@ angular.module('brijj',[])
                }
              }
            }
+           res.xhr = req;
+           
+           var  $rootScope = $injector.get("$rootScope");
+           req.upload.addEventListener("progress", function(evt) {$rootScope.$broadcast("upload:progress", evt);}, false);
+           req.upload.addEventListener("load", function(evt) {$rootScope.$broadcast("upload:load", evt);}, false);
+           req.upload.addEventListener("error", function(evt) {$rootScope.$broadcast("upload:error", evt);}, false);
+           req.upload.addEventListener("abort", function(evt) {$rootScope.$broadcast("upload:abort", evt);}, false);
            req.send(body);
-//           var promise = $q.defer().promise;
+//var promise = $q.defer().promise;
 //           return promise;
            return res;
          }
