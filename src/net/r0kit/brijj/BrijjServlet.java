@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 import java.util.Set;
 import java.util.StringTokenizer;
 import javax.imageio.ImageIO;
@@ -35,12 +36,15 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
+import com.sun.istack.internal.logging.Logger;
 import net.r0kit.brijj.Cast.CastException;
 import net.r0kit.brijj.RemoteRequestProxy.Documentation;
 import net.r0kit.brijj.RemoteRequestProxy.Eg;
 import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
 
 @MultipartConfig public class BrijjServlet extends HttpServlet {
+  private static Logger logger = Logger.getLogger(BrijjServlet.class);
+  
   private static final long serialVersionUID = -8458639444465608967L;
   @Override public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
     String pathInfo = req.getPathInfo();
@@ -87,8 +91,10 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
       rsp = res;
     } catch (InvocationTargetException itx) {
       rsp = itx.getTargetException();
+      logger.log(Level.SEVERE, ((Throwable)rsp).getLocalizedMessage());
     } catch (Throwable ex) {
       rsp = ex;
+      logger.log(Level.SEVERE, ((Throwable)rsp).getLocalizedMessage());
     }
     if (rsp instanceof BufferedImage) rsp = new FileTransfer((BufferedImage) rsp, "png");
     return rsp;
@@ -155,7 +161,7 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
       if (te) out.write("0\r\n\r\n".getBytes());
       out.flush();
     } catch (Error er) {
-      System.err.println(er);
+      logger.log(Level.SEVERE, er.getLocalizedMessage());
     } finally {
       if (in != null) in.close();
       if (out != null) out.close();
@@ -228,7 +234,7 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
     try {
       module = RemoteRequestProxy.getModule(scriptName, null, null);
     } catch (ClassNotFoundException ignore) {
-      System.err.println(ignore.toString());
+      logger.log(Level.SEVERE, ignore.toString());
       return "";
     }
     StringBuilder buffer = new StringBuilder();
@@ -261,7 +267,7 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
     try {
       module = RemoteRequestProxy.getModule(scriptName, null, null);
     } catch (ClassNotFoundException ignore) {
-      System.err.println(ignore.toString());
+      logger.log(Level.SEVERE, ignore.toString());
       return "";
     }
     StringBuilder buffer = new StringBuilder();
@@ -297,11 +303,11 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
       else if (pathInfo.startsWith("/call/")) {
         handle(request, response);
       } else {
-        System.err.println("Page not found. pathInfo='" + request.getPathInfo() + "' requestUrl='" + request.getRequestURI() + "'");
+        logger.log(Level.SEVERE, "Page not found. pathInfo='" + request.getPathInfo() + "' requestUrl='" + request.getRequestURI() + "'");
         response.sendError(HttpServletResponse.SC_NOT_FOUND);
       }
     } catch (Exception ex) {
-      System.err.println("Error: " + ex);
+      logger.log(Level.SEVERE, ex.toString());
       try {
         response.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED, "Error. Details logged to the console");
       } catch (Exception ignore) {}
