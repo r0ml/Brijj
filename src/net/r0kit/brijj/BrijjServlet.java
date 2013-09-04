@@ -26,9 +26,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.logging.Level;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -36,14 +37,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
-import com.sun.istack.internal.logging.Logger;
 import net.r0kit.brijj.Cast.CastException;
 import net.r0kit.brijj.RemoteRequestProxy.Documentation;
 import net.r0kit.brijj.RemoteRequestProxy.Eg;
 import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
 
 @MultipartConfig public class BrijjServlet extends HttpServlet {
-  private static Logger logger = Logger.getLogger(BrijjServlet.class);
+  private static Logger logger = Logger.getLogger("BrijjServlet");
   
   private static final long serialVersionUID = -8458639444465608967L;
   @Override public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
