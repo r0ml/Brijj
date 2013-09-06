@@ -116,7 +116,7 @@ angular.module('brijj',[])
        try {
          var reply = req.responseText;
          if (status != 200 && status != 0) {
-           req.handleException(req.errback, { name:"brijj.http." + status, message:req.statusText }); }
+           req.handleException(req.errback, { name:"brijj.http." + status, message:req.responseText }); }
          else if (reply == null || reply == "") {
            req.handleException(req.errback, { name:"brijj.missingData", message:"No data received from server" }); }
          else {                     

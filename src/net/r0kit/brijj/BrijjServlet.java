@@ -309,7 +309,9 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
     } catch (Exception ex) {
       logger.log(Level.SEVERE, ex.toString());
       try {
-        response.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED, "Error. Details logged to the console");
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        response.getWriter().write(ex.getLocalizedMessage());
+        // response.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED, ex.getLocalizedMessage());
       } catch (Exception ignore) {}
     }
   }
