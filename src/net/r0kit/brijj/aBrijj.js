@@ -1,4 +1,17 @@
 
+/* To get a handle for debugging from the console, use:
+ * h = angular.element('html'); // or whatever element has a scope
+ * swb = h.injector().get('SWBrijj')
+ * 
+ * Debugging looks something like this:
+ * 
+ * h.scope().$apply( function() { swb.kvt('config.features').then(function(x) { console.log(x); } ) } )
+ * 
+ */
+
+function xadb(hz, a) { var h = angular.element(hz); var b = Array.prototype.slice.call(arguments,2); var swb = h.injector().get('{{scriptName}}'); h.scope().$apply( function() { swb[a].apply(swb, b).then(function(x) { console.log(x); } ) } ) };
+
+
 /* */
 /* bbbb = function(res) { angular.module('aaa',[]).service('bbb', function($q,$http) { ccc.$http = $http; ccc.$q = $q; } ); return ccc; } */
 /* angular.module('main',['aaa']).controller('zzz',function(bbb) {}); */
