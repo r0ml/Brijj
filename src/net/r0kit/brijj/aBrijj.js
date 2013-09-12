@@ -11,16 +11,53 @@
 
 function xadb(hz, a) { var h = angular.element(hz); var b = Array.prototype.slice.call(arguments,2); var swb = h.injector().get('{{scriptName}}'); h.scope().$apply( function() { swb[a].apply(swb, b).then(function(x) { console.log(x); } ) } ) };
 
+var _bm = angular.module('brijj',[]);
+
+_bm.factory('errorService', function() {
+  return {
+    errorMessage: null, setError: function(msg) {
+      this.errorMessage = msg; },
+    clear: function() { this.errorMessage = null;
+    } };
+});
+
+_bm.factory('errorHttpInterceptor',
+    function ($q, $location, $rootScope, errorService) { return function (promise) {
+      return promise.then(function (response) {
+        if (response.data[0]=='x') {
+          /** @type { {javaClassName: string, message: string } }*/
+          var errm = eval(response.data.substr(2));
+          if (errm.javaClassName == "net.r0kit.brijj.BrijjServlet$NotLoggedIn") {
+            $rootScope.$broadcast('event:loginRequired');
+            return response;
+          }
+          $rootScope.$broadcast('event:brijjError', errm.message);
+          return response;
+        } else
+        return response;
+      }, function (response) {
+        if (response.status === 401) {
+          $rootScope.$broadcast('event:loginRequired');
+        } else if (response.status >= 400 && response.status < 500) {
+          errorService.setError('Server was unable to find' +
+              ' what you were looking for... Sorry!!');
+        }
+        return $q.reject(response); });
+    }; });
 
 /* */
 /* bbbb = function(res) { angular.module('aaa',[]).service('bbb', function($q,$http) { ccc.$http = $http; ccc.$q = $q; } ); return ccc; } */
 /* angular.module('main',['aaa']).controller('zzz',function(bbb) {}); */
-angular.module('brijj',[])
-  .factory('{{scriptName}}', ['$http','$q','$injector', function($http,$q,$injector) {
+_bm.factory('{{scriptName}}', ['$http','$q','$injector', '$rootScope', function($http,$q,$injector,$rootScope) {
    return {
      _path: '/brijj/',
-     defaultErrorHandler: function(x) {
-       alert(x.javaClassName+": "+x.message); },
+     defaultErrorHandler:  // function(x) {alert(x.javaClassName+": "+x.message); },
+       function(errm) {
+         $rootScope.clem = 'the clem';
+         $rootScope.$broadcast( errm.javaClassName == 'net.r0kit.brijj.BrijjServlet$NotLoggedIn' ?
+           'event:loginRequired' : 'event:brijjError', errm.message);
+       },
+           
      _execute: function(scriptName, methodName, args) {
        var url = this._path + "/call/" + scriptName + "." +methodName;
        var body = "";
