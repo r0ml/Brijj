@@ -11,7 +11,9 @@
 
 function xadb(hz, a) { var h = angular.element(hz); var b = Array.prototype.slice.call(arguments,2); var swb = h.injector().get('{{scriptName}}'); h.scope().$apply( function() { swb[a].apply(swb, b).then(function(x) { console.log(x); } ) } ) };
 
-var _bm = angular.module('brijj',[]);
+var _bm = angular.module('brijj',[], function($httpProvider) {
+  $httpProvider.responseInterceptors.push('errorHttpInterceptor');  
+});
 
 _bm.factory('errorService', function() {
   return {
