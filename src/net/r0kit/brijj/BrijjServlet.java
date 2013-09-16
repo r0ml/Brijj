@@ -534,7 +534,7 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
       return;
     }
     PrintWriter p = response.getWriter();
-    response.setContentType("text/html"); // "text/javascript; charset=\"utf=8\"");
+    response.setContentType("text/brijj"); // "text/javascript; charset=\"utf=8\"");
     p.write("c:");
     Json.writeObject(obj, p);
   }
@@ -543,7 +543,7 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
     Throwable t = tt;
     while (t instanceof InvocationTargetException)
       t = ((InvocationTargetException) t).getTargetException();
-    response.setContentType("text/html"); // "text/javascript; charset=\"utf=8\"");
+    response.setContentType("text/brijj"); // "text/javascript; charset=\"utf=8\"");
     p.write("x:({javaClassName:\"");
     p.write(t.getClass().getName());
     p.write("\",message:\"");
