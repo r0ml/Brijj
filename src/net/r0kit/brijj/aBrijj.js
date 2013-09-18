@@ -55,7 +55,6 @@ _bm.factory('{{scriptName}}', ['$http','$q','$injector', '$rootScope', function(
      _path: '/brijj/',
      defaultErrorHandler:  // function(x) {alert(x.javaClassName+": "+x.message); },
        function(errm) {
-         $rootScope.clem = 'the clem';
          $rootScope.$broadcast( errm.javaClassName == 'net.r0kit.brijj.BrijjServlet$NotLoggedIn' ?
            'event:loginRequired' : 'event:brijjError', errm.message);
        },
