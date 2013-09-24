@@ -129,7 +129,9 @@ public class Json {
       w.write(((FileTransfer) x).getPath());
       return;
     }
-    throw new RuntimeException("unable to convert to Json: " + x.getClass());
+    w.write("\"" + escapeJavaScript(x.toString()) + "\"");
+    // throw new RuntimeException("unable to convert to Json: " + x.getClass());
+    return;
   }
   private static Set<String> reserved = new TreeSet<String>();
   static {
