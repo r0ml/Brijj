@@ -48,6 +48,14 @@ public class FileTransfer {
     this.size = bytes.length;
     this.inputStream = new ByteArrayInputStream(bytes);
   }
+  public FileTransfer(String f, String m, Boolean n, final byte[] bytes, HttpServletRequest req) {
+	this.req = req;
+	this.filename = f;
+	this.mimeType = m;
+	this.inline = n;
+	this.size = bytes.length;
+	this.inputStream = new ByteArrayInputStream(bytes);
+  }
   public String getPath() {
     int z = hashCode();
     timeSaved = System.currentTimeMillis();
