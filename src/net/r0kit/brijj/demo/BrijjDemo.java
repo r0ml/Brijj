@@ -47,6 +47,10 @@ public class BrijjDemo {
       super(r, s);
     }
     
+    public void logError(Exception ex) {
+      System.out.println(ex);
+    }
+    
     @Documentation(text="Supply the name of a person who will be greeted when the button is pressed")
     public String sayHello(@Eg(value="Joe") String name) {
       return "<span style=\"color: rgb(204,153,204);\">Hello, <b style=\"background: rgb(153,204,153); color: rgb(104,13,104); padding: 6px; \">" + name+"</b></span>";
@@ -91,6 +95,9 @@ public class BrijjDemo {
     }
     public int getInt() {
       return 1000000000;
+    }
+    public void logError(Exception ex) {
+      System.out.println(ex);
     }
     public double getDouble() {
       return 1000;

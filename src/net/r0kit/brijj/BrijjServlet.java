@@ -67,6 +67,7 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
   }
   public Object invoker(String mth, Object[] ov, HttpServletRequest req, HttpServletResponse resp) {
     Object rsp;
+    RemoteRequestProxy object = null;
     try {
       String[] smns = mth.split("\\.");
       String clazz = smns[0];
@@ -86,11 +87,12 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
         Type paramType = method.getGenericParameterTypes()[j];
         arguments[j] = Cast.cast(paramType, param);
       }
-      RemoteRequestProxy object = RemoteRequestProxy.getModule(clazz, req, resp);
+      object = RemoteRequestProxy.getModule(clazz, req, resp);
       Object res = method.invoke(object, arguments);
       rsp = res;
     } catch (InvocationTargetException itx) {
       rsp = itx.getTargetException();
+      if (object != null) object.logError((Exception)rsp);
       logger.log(Level.SEVERE, ((Throwable)rsp).getLocalizedMessage());
     } catch (Throwable ex) {
       rsp = ex;

@@ -130,6 +130,9 @@ public abstract class RemoteRequestProxy {
       return RemoteRequestProxy.toRemote(this);
     }
   }
+  
+  public abstract void logError(Exception ex);
+  
   @Target(ElementType.METHOD) @Retention(RetentionPolicy.RUNTIME) public @interface Documentation {
     String text() default "";
   }
