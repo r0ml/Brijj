@@ -31,8 +31,8 @@ public class UploadDownload extends RemoteRequestProxy {
         return new FileTransfer(uploadImage, "png", request);
     }
 
-    public void logError(Exception ex) {
-      System.out.println(ex);
+    public void logError(String mth, Exception ex) {
+      System.out.println(mth+": "+ex);
     }
     
     public FileTransfer downloadPdfFile(String contents) {

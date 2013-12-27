@@ -47,8 +47,8 @@ public class BrijjDemo {
       super(r, s);
     }
     
-    public void logError(Exception ex) {
-      System.out.println(ex);
+    public void logError(String mth, Exception ex) {
+      System.out.println(mth+": "+ex);
     }
     
     @Documentation(text="Supply the name of a person who will be greeted when the button is pressed")
@@ -96,8 +96,8 @@ public class BrijjDemo {
     public int getInt() {
       return 1000000000;
     }
-    public void logError(Exception ex) {
-      System.out.println(ex);
+    public void logError(String mth, Exception ex) {
+      System.out.println(mth+": "+ex);
     }
     public double getDouble() {
       return 1000;
