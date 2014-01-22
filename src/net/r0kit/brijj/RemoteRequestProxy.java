@@ -86,6 +86,7 @@ public abstract class RemoteRequestProxy {
       throws ClassNotFoundException {
     Class<? extends RemoteRequestProxy> clazz = proxies.get(scriptName);
     if (clazz == null) throw new ClassNotFoundException(scriptName);
+    /*
     Locale loca = new Locale("en");
     if (request != null) {
       String lang = request.getHeader("accept-language");
@@ -94,6 +95,7 @@ public abstract class RemoteRequestProxy {
         request.getSession().setAttribute("locale", loca);
       }
     }
+    */
     try {
       return (RemoteRequestProxy) clazz.getConstructor(HttpServletRequest.class, HttpServletResponse.class).newInstance(request,
           response);
