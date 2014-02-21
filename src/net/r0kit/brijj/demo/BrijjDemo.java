@@ -47,7 +47,7 @@ public class BrijjDemo {
       super(r, s);
     }
     
-    public void logError(String mth, Exception ex) {
+    public void logError(String mth, Throwable ex) {
       System.out.println(mth+": "+ex);
     }
     
@@ -96,7 +96,7 @@ public class BrijjDemo {
     public int getInt() {
       return 1000000000;
     }
-    public void logError(String mth, Exception ex) {
+    public void logError(String mth, Throwable ex) {
       System.out.println(mth+": "+ex);
     }
     public double getDouble() {
