@@ -1,5 +1,7 @@
 package net.r0kit.brijj;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -20,6 +22,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import javax.imageio.ImageIO;
 
 public class Cast {
   // The below copied from R0Kit
@@ -321,6 +324,9 @@ public class Cast {
     if (z instanceof Long) return castLong(t, (Long) z);
     if (z instanceof Boolean) return castBoolean(t, (Boolean) z);
     if (z.getClass().isEnum()) return castEnum(t, (Enum<?>) z);
+    if (z instanceof FileTransfer && t == BufferedImage.class) { 
+      try { return (T)ImageIO.read( ((FileTransfer)z).getInputStream() ); } catch(IOException iox) {} 
+    }
     // FIXME: what about encoding?
     if (z instanceof byte[]) return castString(t, new String((byte[]) z));
     if (Map.class.isAssignableFrom(t)) {

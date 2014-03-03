@@ -564,7 +564,8 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
     try {
       String ct = z.getContentType();
       if (ct == null) return readObject(readAllTextFrom(new InputStreamReader(z.getInputStream(),"UTF-8")));
-      else if (ct.startsWith("image/")) return ImageIO.read(z.getInputStream());
+      // TODO: Figure out how to handle iamges properly?
+      // else if (ct.startsWith("image/")) return ImageIO.read(z.getInputStream());
       else return new FileTransfer(getFilename(z), ct, readAllBytesFrom(z.getInputStream()), null);
       // else if (ct.startsWith("text/")) return readAllTextFrom(new InputStreamReader(z.getInputStream(), "UTF-8"));
       // else return readAllBytesFrom(z.getInputStream());
