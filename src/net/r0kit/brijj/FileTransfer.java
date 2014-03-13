@@ -77,6 +77,7 @@ public class FileTransfer {
   }
   public BufferedImage asImage() {
     try {
+      byte[] n = getBytes();
       return ImageIO.read(getInputStream());
     } catch (IOException ioe) {
       return null;
@@ -93,6 +94,7 @@ public class FileTransfer {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     byte[] buffer = new byte[4096];
     InputStream i = getInputStream();
+    i.reset();
     while (true) {
       int n = i.read(buffer);
       if (n <= 0) break;
