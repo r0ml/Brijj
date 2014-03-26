@@ -7,5 +7,11 @@
 	<classpathentry exported="true" kind="lib" path="lib/tomcat-embed-logging-juli.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/tomcat-embed-logging-log4j.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="lib" path="lib/jai_imageio.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/clibwrapper_jiio.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Brijj/lib"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -45,6 +45,10 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
 @MultipartConfig public class BrijjServlet extends HttpServlet {
   private static Logger logger = Logger.getLogger("BrijjServlet");
   
+  static {
+    javax.imageio.spi.IIORegistry.getDefaultInstance().registerServiceProvider(new com.sun.media.imageioimpl.plugins.tiff.TIFFImageReaderSpi());
+  }
+  
   private static final long serialVersionUID = -8458639444465608967L;
   @Override public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
     String pathInfo = req.getPathInfo();
