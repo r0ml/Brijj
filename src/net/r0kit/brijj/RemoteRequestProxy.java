@@ -133,7 +133,7 @@ public abstract class RemoteRequestProxy {
     }
   }
   
-  public abstract void logError(String mth, Throwable ex);
+  public abstract void logError(String mth, String arg, Throwable ex);
   
   @Target(ElementType.METHOD) @Retention(RetentionPolicy.RUNTIME) public @interface Documentation {
     String text() default "";

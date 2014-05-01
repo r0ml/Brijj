@@ -96,7 +96,13 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
       rsp = res;
     } catch (InvocationTargetException itx) {
       rsp = itx.getTargetException();
-      if (object != null) object.logError(mth, (Throwable)rsp);
+      if (object != null) {
+    	  if ( (String) ov[0] instanceof String) {
+    		  object.logError(mth, (String) ov[0], (Throwable)rsp);
+    	  } else {
+    		  object.logError(mth, "", (Throwable)rsp);
+    	  }
+      }
       logger.log(Level.SEVERE, ((Throwable)rsp).getLocalizedMessage());
     } catch (Throwable ex) {
       rsp = ex;

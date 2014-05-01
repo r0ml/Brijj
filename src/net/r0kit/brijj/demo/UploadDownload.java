@@ -31,7 +31,7 @@ public class UploadDownload extends RemoteRequestProxy {
         return new FileTransfer(uploadImage, "png", request);
     }
 
-    public void logError(String mth, Throwable ex) {
+    public void logError(String mth, String arg, Throwable ex) {
       System.out.println(mth+": "+ex);
     }
     
