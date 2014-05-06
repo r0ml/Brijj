@@ -188,6 +188,10 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
   public void doTest(HttpServletRequest req, HttpServletResponse resp, String src) throws IOException {
     String h = req.getRequestURL().toString();
     h = h.substring(0, h.length() - req.getPathInfo().length());
+    
+    int colon = h.indexOf(':');
+    if (colon >= 0) h = h.substring(colon+1);
+    
     resp.setContentType("text/html");
     resp.getWriter().println(generateTestPage(h, src));
   }
