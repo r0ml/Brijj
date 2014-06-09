@@ -67,7 +67,7 @@ _bm.factory('logService', function($rootScope) {
 /* */
 /* bbbb = function(res) { angular.module('aaa',[]).service('bbb', function($q,$http) { ccc.$http = $http; ccc.$q = $q; } ); return ccc; } */
 /* angular.module('main',['aaa']).controller('zzz',function(bbb) {}); */
-_bm.factory('{{scriptName}}', ['$http','$q','$injector', '$rootScope', 'navState', 'logService', function($http,$q,$injector,$rootScope, navState, logService) {
+_bm.factory('{{scriptName}}', ['$http','$q','$injector', '$rootScope', 'logService', function($http,$q,$injector,$rootScope, logService) {
     return {
         _path: '/brijj/',
     defaultErrorHandler:  // function(x) {alert(x.javaClassName+": "+x.message); },
@@ -79,8 +79,7 @@ _bm.factory('{{scriptName}}', ['$http','$q','$injector', '$rootScope', 'navState
     _execute: function(scriptName, methodName, args) {
         var url = this._path + "/call/" + scriptName + "." +methodName;
         var body = "";
-        var log_item = {"user": navState.userid, "company": navState.company, "role": navState.role,
-                        "page": document.location.href, "method": methodName, "args": JSON.stringify(args)};
+        var log_item = {"page": document.location.href, "method": methodName, "args": JSON.stringify(args)};
         var start = Date.now();
         try { for (var i=0;i< args.length;i++) body += this._serialize(args[i]) + "\n"; }
         catch(err) {
