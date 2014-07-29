@@ -12,7 +12,7 @@
 function xadb(hz, a) { var h = angular.element(hz); var b = Array.prototype.slice.call(arguments,2); var swb = h.injector().get('{{scriptName}}'); h.scope().$apply( function() { swb[a].apply(swb, b).then(function(x) { console.log(x); } ) } ) };
 
 var _bm = angular.module('brijj',[], function($httpProvider) {
-    $httpProvider.responseInterceptors.push('errorHttpInterceptor');  
+    $httpProvider.interceptors.push('errorHttpInterceptor');
 });
 
 _bm.factory('errorService', function() {
@@ -24,8 +24,10 @@ _bm.factory('errorService', function() {
 });
 
 _bm.factory('errorHttpInterceptor',
-        function ($q, $location, $rootScope, errorService) { return function (promise) {
-            return promise.then(function (response) {
+    ['$q', '$rootScope', 'errorService',
+    function ($q, $rootScope, errorService) {
+        return {
+            'response': function (response) {
                 if (response.data[0]=='x') {
                     /** @type { {javaClassName: string, message: string } }*/
                     var errm = eval(response.data.substr(2));
@@ -36,16 +38,19 @@ _bm.factory('errorHttpInterceptor',
                     $rootScope.$broadcast('event:brijjError', errm.message);
                     return response;
                 } else
-                return response;
-            }, function (response) {
+                    return response;
+            },
+            'responseError': function (response) {
                 if (response.status === 401) {
                     $rootScope.$broadcast('event:loginRequired');
                 } else if (response.status >= 400 && response.status < 500) {
                     errorService.setError('Server was unable to find' +
-                        ' what you were looking for... Sorry!!');
+                                          ' what you were looking for... Sorry!!');
                 }
-                return $q.reject(response); });
-        }; });
+                return $q.reject(response);
+            }
+        };
+    }]);
 
 _bm.factory('logService', function($rootScope) {
     return {
