@@ -55,7 +55,8 @@ public abstract class RemoteRequestProxy {
         int mm = method.getModifiers();
         if (!Modifier.isPublic(mm)) continue;
         if (Modifier.isStatic(mm)) continue;
-        if (null != method.getAnnotationsByType(Hidden.class)) continue;
+        Hidden[] a = method.getAnnotationsByType(Hidden.class);
+        if (0 < a.length) continue;
         methodList.add(method);
       }
     }
