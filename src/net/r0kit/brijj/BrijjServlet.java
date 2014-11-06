@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -17,6 +18,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -303,13 +305,26 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
 
 
   
+  public void passthrough(HttpServletRequest request, HttpServletResponse response, String post) throws IOException, ServletException {
+    try {
+      Object object = RemoteRequestProxy.getModule("SWBrijj", request, response);
+      Method m = object.getClass().getMethod("passthrough", HttpServletRequest.class, HttpServletResponse.class, String.class);
+      m.invoke(object, request, response, post);
+    } catch(InvocationTargetException ite) {
+      throw new ServletException(ite.getTargetException());
+    } catch(Exception ce) {
+      throw new ServletException(ce);
+    }
+  }
   
-  
-  @Override public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+  @Override public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException  {
     try {
       String pathInfo = request.getPathInfo();
       if (pathInfo.startsWith("/download/")) doDownload(request, response,
           Integer.parseInt(pathInfo.substring("/download/".length())));
+      else if (pathInfo.startsWith("/bridj")) {
+        passthrough(request, response, getPost(request));
+      }
       else if (pathInfo.startsWith("/call/")) {
         handle(request, response);
       } else {
@@ -408,6 +423,45 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
     Object rsp = invoker( request.getPathInfo().substring("/call/".length()), ov, request, response);
     writeJavascript(response, rsp);
   }
+  
+  public String getPost(HttpServletRequest req) throws ServletException {
+/*    List<Object> lf = new LinkedList<Object>();
+    if (isMultipartContent(req)) {
+      try {
+        Collection<Part> p = req.getParts();
+        for (Part z : p) {
+          String n = z.getName();
+          Object o = readObject(z);
+          // lf.set(Integer.valueOf(z.getName().substring(1)), readObject(z));
+          lf.add(o);
+        }
+        return lf.toArray();
+      } catch (ServletException sx) {
+        throw new BrijjException(sx);
+      } catch (IOException ix) {
+        throw new BrijjException(ix);
+      }
+    } else {
+*/
+
+    try {
+        String ce = req.getCharacterEncoding();
+        InputStream is = req.getInputStream();
+        InputStreamReader isr = ce != null ? new InputStreamReader(is, ce) : new InputStreamReader(is);
+        int n = req.getContentLength();
+        StringWriter sos = new StringWriter();
+        char cb[] = new char[1024];
+        while(true) {
+          int z = isr.read(cb);
+          if (z == -1) break;
+          sos.write(cb,0,z);
+        }
+        return sos.toString();
+      } catch (Exception ex) {
+        throw new ServletException("Failed to read input", ex);
+      }
+  }
+
   
   private Object[] parsePost(HttpServletRequest req) throws BrijjException {
     List<Object> lf = new LinkedList<Object>();

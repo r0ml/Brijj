@@ -283,7 +283,14 @@ _bm.factory('{{scriptName}}', ['$http','$q','$injector', '$rootScope', 'logServi
         }
     },
 
-
+    passthrough: function(args) {
+      var url = this._path+"/bridj";
+      var p = JSON.stringify(args);
+      var req = $http.post(url, p);
+      console.log(url+": "+p);
+      return req.then(function(x) { return x.data });
+    }, 
+    
 
 
     {{functions}}
