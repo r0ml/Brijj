@@ -55,6 +55,7 @@ public abstract class RemoteRequestProxy {
         int mm = method.getModifiers();
         if (!Modifier.isPublic(mm)) continue;
         if (Modifier.isStatic(mm)) continue;
+        if (null != method.getAnnotationsByType(Hidden.class)) continue;
         methodList.add(method);
       }
     }
@@ -135,6 +136,8 @@ public abstract class RemoteRequestProxy {
   
   public abstract void logError(String mth, Throwable ex);
   
+  @Target(ElementType.METHOD) @Retention(RetentionPolicy.RUNTIME) public @interface Hidden {
+  }
   @Target(ElementType.METHOD) @Retention(RetentionPolicy.RUNTIME) public @interface Documentation {
     String text() default "";
   }
