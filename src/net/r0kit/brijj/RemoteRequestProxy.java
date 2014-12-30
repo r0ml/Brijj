@@ -35,9 +35,13 @@ public abstract class RemoteRequestProxy {
   /** registers classes to be exposed to Brijj. If we could introspect and get a list of my subclasses, I wouldn't need to register
    * those subclasses */
   public static void register(Class<? extends RemoteRequestProxy>... cls) {
-    for (Class<? extends RemoteRequestProxy> cl : cls) {
-      if (RemoteRequestProxy.class.isAssignableFrom(cl) || Remotable.class.isAssignableFrom(cl)) proxies
-          .put(cl.getSimpleName(), cl);
+    for (Class<? extends RemoteRequestProxy> cl : cls) {	
+      if (RemoteRequestProxy.class.isAssignableFrom(cl) || Remotable.class.isAssignableFrom(cl)) {
+    	  ServiceName[] anx = cl.getAnnotationsByType(ServiceName.class);
+    	  String s = cl.getSimpleName();
+    	  if (anx.length > 0) s = anx[0].name();
+    	  proxies.put(s, cl);
+      }
       else throw new RuntimeException("cannot register " + cl);
     }
   }
@@ -147,5 +151,9 @@ public abstract class RemoteRequestProxy {
   }
   
   @Target(ElementType.METHOD) @Retention(RetentionPolicy.RUNTIME) public @interface PreLogin {
+  }
+  
+  @Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME) public @interface ServiceName {
+	  String name();
   }
 }
