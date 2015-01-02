@@ -56,17 +56,7 @@ _bm.factory('errorHttpInterceptor',
 /* */
 /* bbbb = function(res) { angular.module('aaa',[]).service('bbb', function($q,$http) { ccc.$http = $http; ccc.$q = $q; } ); return ccc; } */
 /* angular.module('main',['aaa']).controller('zzz',function(bbb) {}); */
-_bm.factory('{{scriptName}}', ['$http','$q','$injector', '$rootScope', function($http,$q,$injector,$rootScope) {
-
-  
-   var ptfn = function(args) {
-    var url = "/brijj/bridj";
-    var p = JSON.stringify(args);
-    var req = $http.post(url, p);
-    console.log(url+": "+p);
-    return req.then(function(x) { return x.data });
-  }; 
-  
+_bm.factory('{{scriptName}}', ['$http','$q','$injector', '$rootScope', function($http,$q,$injector,$rootScope) {  
    return {
         _path: '/brijj/',
     defaultErrorHandler:  // function(x) {alert(x.javaClassName+": "+x.message); },
@@ -264,31 +254,6 @@ _bm.factory('{{scriptName}}', ['$http','$q','$injector', '$rootScope', function(
             case 'x': throw eval(toEval.substring(2));
             default: alert("unknown server-response type: "+rsp[0]);
         }
-    },
-
-    passthrough: ptfn,
-    proc: function(f) { var p = ptfn({'op':'execute','function':f,'asarray':true,
-      'args':Array.prototype.slice.call(arguments,1) });
-    // the real promise should be:  return p;
-    // however, for the old style: then().except() ....
-      return {
-        then: function(f,fx) {
-          var erf = function(errm) {
-            errm = fixerrm(erm);
-            $rootScope.$broadcast( errm.javaClassName == 'net.r0kit.brijj.BrijjServlet$NotLoggedIn' ?
-                'event:loginRequired' : 'event:brijjError', errm.message);
-            };
-          if (typeof(fx) == 'undefined') {
-            var q = p.then(f,erf);
-            q.except = function(g) {
-              return q.then(id, function(errm) { return g(fixerrm(errm)); } );
-            };
-            return q;
-          } else {
-            return p.then(f, function(errm) { return fx(fixerrm(errm)); } );
-          }
-        }
-      }
     },
 
     {{functions}}
