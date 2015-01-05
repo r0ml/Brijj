@@ -262,6 +262,6 @@ _bm.factory('{{scriptName}}', ['$http','$q','$injector', '$rootScope', function(
 
 function fixerrm(errm) {
   errm.message = errm.message || errm.data;
-  try { errm.javaClassName = (err.data.match(/[^:]*)(:|$)/))[1]; } catch(err) {}
+  try { errm.javaClassName = (err.data.match(/([^:]*)(:|$)/))[1]; } catch(err) {}
   return errm;
 }
