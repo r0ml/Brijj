@@ -2,11 +2,11 @@
 /* To get a handle for debugging from the console, use:
  * h = angular.element('html'); // or whatever element has a scope
  * swb = h.injector().get('SWBrijj')
- * 
+ *
  * Debugging looks something like this:
- * 
+ *
  * h.scope().$apply( function() { swb.kvt('config.features').then(function(x) { console.log(x); } ) } )
- * 
+ *
  */
 
 function xadb(hz, a) { var h = angular.element(hz); var b = Array.prototype.slice.call(arguments,2); var swb = h.injector().get('{{scriptName}}'); h.scope().$apply( function() { swb[a].apply(swb, b).then(function(x) { console.log(x); } ) } ) };
@@ -56,8 +56,8 @@ _bm.factory('errorHttpInterceptor',
 /* */
 /* bbbb = function(res) { angular.module('aaa',[]).service('bbb', function($q,$http) { ccc.$http = $http; ccc.$q = $q; } ); return ccc; } */
 /* angular.module('main',['aaa']).controller('zzz',function(bbb) {}); */
-_bm.factory('{{scriptName}}', ['$http','$q','$injector', '$rootScope', function($http,$q,$injector,$rootScope) {  
-   return {
+_bm.factory('{{scriptName}}', ['$http','$q','$injector', '$rootScope', function($http,$q,$injector,$rootScope) {
+    return {
         _path: '/brijj/',
     defaultErrorHandler:  // function(x) {alert(x.javaClassName+": "+x.message); },
     function(errm) {
@@ -73,7 +73,7 @@ _bm.factory('{{scriptName}}', ['$http','$q','$injector', '$rootScope', function(
         try { for (var i=0;i< args.length;i++) body += this._serialize(args[i]) + "\n"; }
         catch(err) {
             if (err == "fileUpload") { return sendIframe(url, args, callback, errorHandler); }
-            else if (err == "formUpload") { 
+            else if (err == "formUpload") {
                 body = args[0];
                 var req = new XMLHttpRequest();
                 req.callback = function(x) { console.log(x); };
@@ -137,7 +137,7 @@ _bm.factory('{{scriptName}}', ['$http','$q','$injector', '$rootScope', function(
                     except: function(y) {
                         req.errorHandler = y;
                         req.error(y);
-                    } 
+                    }
                   }
                 } else {
                   req.then( zfn, errx);
@@ -170,7 +170,7 @@ _bm.factory('{{scriptName}}', ['$http','$q','$injector', '$rootScope', function(
                 req.handleException(req.errback, { name:"brijj.http." + status, message:req.responseText }); }
             else if (reply == null || reply == "") {
                 req.handleException(req.errback, { name:"brijj.missingData", message:"No data received from server" }); }
-            else {                     
+            else {
                 var contentType = req.getResponseHeader("Content-Type");
                 toEval = reply; }
         }
@@ -250,7 +250,7 @@ _bm.factory('{{scriptName}}', ['$http','$q','$injector', '$rootScope', function(
         req.send(body);
         var rsp = req.response;
         switch(rsp[0]) {
-            case 'c': return eval(rsp.substring(2)); 
+            case 'c': return eval(rsp.substring(2));
             case 'x': throw eval(toEval.substring(2));
             default: alert("unknown server-response type: "+rsp[0]);
         }
