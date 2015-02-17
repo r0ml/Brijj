@@ -52,27 +52,10 @@ _bm.factory('errorHttpInterceptor',
         };
     }]);
 
-_bm.factory('logService', function($rootScope) {
-    return {
-        log: [],
-        sendLog: function(log) {
-            $rootScope.$broadcast('dblog:updated', this.log);
-        },
-        addItem: function(log_item, startTime) {
-            log_item.time = Date.now()-startTime;
-            this.log.push(log_item);
-            this.sendLog();
-            // could restrict this to only send under certain conditions
-        },
-        clearLog: function() {
-            this.log = [];
-        }
-    };
-});
 /* */
 /* bbbb = function(res) { angular.module('aaa',[]).service('bbb', function($q,$http) { ccc.$http = $http; ccc.$q = $q; } ); return ccc; } */
 /* angular.module('main',['aaa']).controller('zzz',function(bbb) {}); */
-_bm.factory('{{scriptName}}', ['$http','$q','$injector', '$rootScope', 'logService', function($http,$q,$injector,$rootScope, logService) {
+_bm.factory('{{scriptName}}', ['$http','$q','$injector', '$rootScope', function($http,$q,$injector,$rootScope) {
     return {
         _path: '/brijj/',
     defaultErrorHandler:  // function(x) {alert(x.javaClassName+": "+x.message); },
@@ -151,7 +134,6 @@ _bm.factory('{{scriptName}}', ['$http','$q','$injector', '$rootScope', 'logServi
         return {
             then: function(x) {
                 var zfn = function(z) {
-                    logService.addItem(log_item, start);
                     switch( z.data[0]) {
                         case 'c':
                             x.apply(window, [eval(z.data.substring(2))]);
