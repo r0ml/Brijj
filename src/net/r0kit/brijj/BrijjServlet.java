@@ -135,10 +135,7 @@ import net.r0kit.brijj.RemoteRequestProxy.PreLogin;
     }
     resp.setContentType(ft.mimeType);
     if (ft.size > 0) resp.setContentLength((int) ft.size);
-    /*if (ft.filename != null) {
-      resp.setHeader("Content-Disposition", (ft.inline ? "inline" : "attachment") + ";filename=" + ft.filename);
-    }*/
-    resp.setHeader("Content-Disposition",(ft.inline ? "inline" : "attachment") + (ft.filename != null ? ";filename="+ft.filename : ""));
+    resp.setHeader("Content-Disposition",(ft.inline ? "inline" : "attachment") + (ft.filename != null ? (";filename=\""+ft.filename.trim().replace("\"", "")+"\"") : ""));
     if (ft.size < 0) resp.setHeader("Transfer-Encoding", "chunked");
     else resp.setHeader("Content-Transfer-Encoding", "binary");
     resp.setHeader("Expires", "0");
